@@ -14,7 +14,6 @@ from langchain_openai import ChatOpenAI
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
@@ -29,10 +28,9 @@ class MAGIState(TypedDict):
     casper_elapsed: float
     final_decision: str
 
-# --- I TRE CERVELLI MAGI (Powered by GitHub Models 100% Stabili) ---
+# --- I TRE CERVELLI MAGI (Powered by GitHub Models) ---
 
-# MELCHIOR-1 (Scienziata): Logica formale.
-# Modello: gpt-4o-mini (Veloce, analitico e matematico). Temp: bassissima.
+# MELCHIOR-1 (Scienziata): Logica formale. Temp: bassissima.
 llm_melchior = ChatOpenAI(
     api_key=os.getenv("GITHUB_TOKEN"),
     base_url="https://models.inference.ai.azure.com",
@@ -40,8 +38,7 @@ llm_melchior = ChatOpenAI(
     temperature=0.1
 )
 
-# BALTHASAR-2 (Madre): Empatia e protezione.
-# Modello: gpt-4o (L'ammiraglia, eccellente nei dilemmi etici). Temp: media.
+# BALTHASAR-2 (Madre): Empatia e protezione. Temp: media.
 llm_balthasar = ChatOpenAI(
     api_key=os.getenv("GITHUB_TOKEN"),
     base_url="https://models.inference.ai.azure.com",
@@ -49,9 +46,7 @@ llm_balthasar = ChatOpenAI(
     temperature=0.4
 )
 
-# CASPER-3 (Donna): Sociale, istintiva e pragmatica.
-# Modello: gpt-4o (Usiamo lo stesso motore potente, ma aumentiamo la temperatura 
-# per renderla più imprevedibile, "umana" e meno robotica rispetto agli altri due).
+# CASPER-3 (Donna): Sociale, istintiva e pragmatica. Temp: alta (più "umana").
 llm_casper = ChatOpenAI(
     api_key=os.getenv("GITHUB_TOKEN"),
     base_url="https://models.inference.ai.azure.com",
@@ -79,13 +74,14 @@ chi sono, che vite hanno, come verranno colpite le loro relazioni e comunità.
 Pensi alle conseguenze sociali a lungo termine, non alle statistiche aggregate.
 Hai a cuore il tessuto umano — famiglia, identità, cultura locale — più di qualsiasi calcolo astratto."""
 
+
 # --- FUNZIONI DI SUPPORTO ---
 
 def ask_agent(persona_desc: str, dilemma: str, modello, max_retries: int = 3) -> tuple[str, float]:
     """
     Invia il dilemma al modello con la personalità specificata.
     Restituisce (risposta, secondi_impiegati).
-    In caso di errore temporaneo (es. 503 Gemini), ritenta con backoff lineare.
+    In caso di errore temporaneo, ritenta con backoff lineare.
     """
     prompt = ChatPromptTemplate.from_messages([
         (
@@ -129,32 +125,57 @@ def estrai_voto(response: str) -> str:
 
 def salva_log(state: MAGIState) -> None:
     """
-    Salva il risultato della run in due formati:
-    1. JSON (per il parsing dei dati)
-    2. Markdown (per la lettura umana formattata)
+    Salva il risultato della run in cartelle separate per tipo:
+
+    logs/
+    ├── json/
+    │   └── YYYYMMDD/
+    │       └── magi_run_YYYYMMDD_HHMMSS.json
+    └── markdown/
+        └── YYYYMMDD/
+            └── magi_run_YYYYMMDD_HHMMSS.md
+
+    Ogni file contiene una sola deliberazione, facilitando:
+    - Query e parsing automatico dei JSON
+    - Lettura umana dei Markdown
+    - Archiviazione e ricerca per data
     """
-    os.makedirs("logs", exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # --- 1. SALVATAGGIO JSON (Per le macchine) ---
-    json_filename = f"logs/magi_run_{timestamp}.json"
+    now = datetime.now()
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
+    date_dir  = now.strftime("%Y%m%d")
+
+    # --- Costruzione struttura cartelle ---
+    json_dir = os.path.join("logs", "json", date_dir)
+    md_dir   = os.path.join("logs", "markdown", date_dir)
+    os.makedirs(json_dir, exist_ok=True)
+    os.makedirs(md_dir,   exist_ok=True)
+
+    json_filename = os.path.join(json_dir, f"magi_run_{timestamp}.json")
+    md_filename   = os.path.join(md_dir,   f"magi_run_{timestamp}.md")
+
+    # Estrai i voti una sola volta
+    voto_melchior  = estrai_voto(state["melchior_response"])
+    voto_balthasar = estrai_voto(state["balthasar_response"])
+    voto_casper    = estrai_voto(state["casper_response"])
+
+    # --- 1. JSON (per le macchine) ---
     log_entry = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": now.isoformat(),
         "dilemma": state["dilemma"].strip(),
         "risposte": {
             "melchior": {
-                "testo": state["melchior_response"],
-                "voto": estrai_voto(state["melchior_response"]),
+                "testo":       state["melchior_response"],
+                "voto":        voto_melchior,
                 "elapsed_sec": state["melchior_elapsed"]
             },
             "balthasar": {
-                "testo": state["balthasar_response"],
-                "voto": estrai_voto(state["balthasar_response"]),
+                "testo":       state["balthasar_response"],
+                "voto":        voto_balthasar,
                 "elapsed_sec": state["balthasar_elapsed"]
             },
             "casper": {
-                "testo": state["casper_response"],
-                "voto": estrai_voto(state["casper_response"]),
+                "testo":       state["casper_response"],
+                "voto":        voto_casper,
                 "elapsed_sec": state["casper_elapsed"]
             }
         },
@@ -164,29 +185,29 @@ def salva_log(state: MAGIState) -> None:
     with open(json_filename, "w", encoding="utf-8") as f:
         json.dump(log_entry, f, ensure_ascii=False, indent=2)
 
-    # --- 2. SALVATAGGIO MARKDOWN (Per gli umani) ---
-    md_filename = f"logs/magi_run_{timestamp}.md"
+    # --- 2. MARKDOWN (per gli umani) ---
     with open(md_filename, "w", encoding="utf-8") as f:
         f.write(f"# 🔴 REPORT DELIBERAZIONE MAGI\n")
-        f.write(f"**Data:** {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n\n")
-        
+        f.write(f"**Data:** {now.strftime('%d/%m/%Y %H:%M:%S')}\n\n")
+
         f.write(f"## 📜 DILEMMA\n> {state['dilemma'].strip()}\n\n---\n\n")
-        
-        f.write(f"### 🧠 MELCHIOR-1 (Scienziata) - [{state['melchior_elapsed']}s]\n")
-        f.write(f"**Voto:** `{estrai_voto(state['melchior_response'])}`\n\n")
+
+        f.write(f"### 🧠 MELCHIOR-1 (Scienziata) — [{state['melchior_elapsed']}s]\n")
+        f.write(f"**Voto:** `{voto_melchior}`\n\n")
         f.write(f"{state['melchior_response']}\n\n---\n\n")
-        
-        f.write(f"### 🤱 BALTHASAR-2 (Madre) - [{state['balthasar_elapsed']}s]\n")
-        f.write(f"**Voto:** `{estrai_voto(state['balthasar_response'])}`\n\n")
+
+        f.write(f"### 🤱 BALTHASAR-2 (Madre) — [{state['balthasar_elapsed']}s]\n")
+        f.write(f"**Voto:** `{voto_balthasar}`\n\n")
         f.write(f"{state['balthasar_response']}\n\n---\n\n")
-        
-        f.write(f"### 💃 CASPER-3 (Donna) - [{state['casper_elapsed']}s]\n")
-        f.write(f"**Voto:** `{estrai_voto(state['casper_response'])}`\n\n")
+
+        f.write(f"### 💃 CASPER-3 (Donna) — [{state['casper_elapsed']}s]\n")
+        f.write(f"**Voto:** `{voto_casper}`\n\n")
         f.write(f"{state['casper_response']}\n\n---\n\n")
-        
+
         f.write(f"## ⚖️ DECISIONE FINALE: {state['final_decision']}\n")
 
-    print(f"\n📁 Log salvati in:\n   - {json_filename}\n   - {md_filename}")
+    print(f"\n📁 Log salvati in:\n   📄 {json_filename}\n   📝 {md_filename}")
+
 
 # --- NODI DEL GRAFO ---
 
@@ -212,7 +233,7 @@ def arbitro_node(state: MAGIState):
     print("\n⚖️  L'arbitro sta contando i voti...")
 
     voti = {
-        "melchior": estrai_voto(state["melchior_response"]),
+        "melchior":  estrai_voto(state["melchior_response"]),
         "balthasar": estrai_voto(state["balthasar_response"]),
         "casper":    estrai_voto(state["casper_response"]),
     }
@@ -263,41 +284,35 @@ builder.add_edge("logging", END)
 
 magi_system = builder.compile()
 
+
 # --- SERVER FASTAPI ---
 app = FastAPI()
 
-# Definiamo la struttura del pacchetto in arrivo dal frontend
 class DilemmaRequest(BaseModel):
     dilemma: str
 
-# Questa rotta serve la tua pagina HTML quando apri il browser
 @app.get("/")
 def serve_frontend():
     return FileResponse("magi_interface.html")
 
-# Questa è l'API (il "cavo di rete") che l'HTML chiamerà per attivare LangGraph
 @app.post("/api/delibera")
 def api_delibera(req: DilemmaRequest):
     print("\n" + "="*50)
     print("🚀 RICHIESTA RICEVUTA DAL FRONTEND")
     print("="*50)
-    
-    # Facciamo girare il grafo con il dilemma ricevuto
+
     result = magi_system.invoke({"dilemma": req.dilemma})
-    
-    # Prepariamo la risposta per il Javascript
-    # Prepariamo la risposta per il Javascript
+
     return {
-        "melchior_voto": estrai_voto(result["melchior_response"]),
-        "balthasar_voto": estrai_voto(result["balthasar_response"]),
-        "casper_voto": estrai_voto(result["casper_response"]),
-        # AGGIUNGI QUESTE TRE RIGHE:
-        "melchior_testo": result["melchior_response"],
-        "balthasar_testo": result["balthasar_response"],
-        "casper_testo": result["casper_response"],
-        
+        "melchior_voto":    estrai_voto(result["melchior_response"]),
+        "balthasar_voto":   estrai_voto(result["balthasar_response"]),
+        "casper_voto":      estrai_voto(result["casper_response"]),
+        "melchior_testo":   result["melchior_response"],
+        "balthasar_testo":  result["balthasar_response"],
+        "casper_testo":     result["casper_response"],
         "decisione_finale": result["final_decision"]
     }
+
 
 if __name__ == "__main__":
     print("🌐 Avvio Server MAGI sulla porta 8000...")
