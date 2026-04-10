@@ -129,13 +129,15 @@ def estrai_voto(response: str) -> str:
 
 def salva_log(state: MAGIState) -> None:
     """
-    Salva il risultato completo della run in un file JSON nella cartella 'logs/'.
-    Il nome del file include il timestamp per rendere ogni run tracciabile.
+    Salva il risultato della run in due formati:
+    1. JSON (per il parsing dei dati)
+    2. Markdown (per la lettura umana formattata)
     """
     os.makedirs("logs", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"logs/magi_run_{timestamp}.json"
-
+    
+    # --- 1. SALVATAGGIO JSON (Per le macchine) ---
+    json_filename = f"logs/magi_run_{timestamp}.json"
     log_entry = {
         "timestamp": datetime.now().isoformat(),
         "dilemma": state["dilemma"].strip(),
@@ -159,11 +161,32 @@ def salva_log(state: MAGIState) -> None:
         "decisione_finale": state["final_decision"]
     }
 
-    with open(filename, "w", encoding="utf-8") as f:
+    with open(json_filename, "w", encoding="utf-8") as f:
         json.dump(log_entry, f, ensure_ascii=False, indent=2)
 
-    print(f"\n📁 Log salvato in: {filename}")
+    # --- 2. SALVATAGGIO MARKDOWN (Per gli umani) ---
+    md_filename = f"logs/magi_run_{timestamp}.md"
+    with open(md_filename, "w", encoding="utf-8") as f:
+        f.write(f"# 🔴 REPORT DELIBERAZIONE MAGI\n")
+        f.write(f"**Data:** {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n\n")
+        
+        f.write(f"## 📜 DILEMMA\n> {state['dilemma'].strip()}\n\n---\n\n")
+        
+        f.write(f"### 🧠 MELCHIOR-1 (Scienziata) - [{state['melchior_elapsed']}s]\n")
+        f.write(f"**Voto:** `{estrai_voto(state['melchior_response'])}`\n\n")
+        f.write(f"{state['melchior_response']}\n\n---\n\n")
+        
+        f.write(f"### 🤱 BALTHASAR-2 (Madre) - [{state['balthasar_elapsed']}s]\n")
+        f.write(f"**Voto:** `{estrai_voto(state['balthasar_response'])}`\n\n")
+        f.write(f"{state['balthasar_response']}\n\n---\n\n")
+        
+        f.write(f"### 💃 CASPER-3 (Donna) - [{state['casper_elapsed']}s]\n")
+        f.write(f"**Voto:** `{estrai_voto(state['casper_response'])}`\n\n")
+        f.write(f"{state['casper_response']}\n\n---\n\n")
+        
+        f.write(f"## ⚖️ DECISIONE FINALE: {state['final_decision']}\n")
 
+    print(f"\n📁 Log salvati in:\n   - {json_filename}\n   - {md_filename}")
 
 # --- NODI DEL GRAFO ---
 
