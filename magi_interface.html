@@ -1,0 +1,638 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #magi-root {
+    background: #000;
+    min-height: 100vh;
+    font-family: 'Share Tech Mono', monospace;
+    color: #f90;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* ---- SCREEN 1: INPUT ---- */
+  #screen-input {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .nerv-header {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    color: #f90;
+    letter-spacing: 0.2em;
+    margin-bottom: 2rem;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .magi-title-big {
+    font-size: clamp(28px, 6vw, 52px);
+    color: #f90;
+    letter-spacing: 0.3em;
+    text-align: center;
+    margin-bottom: 0.3rem;
+    text-shadow: 0 0 20px #f904;
+  }
+
+  .magi-subtitle {
+    font-size: 11px;
+    color: #f906;
+    letter-spacing: 0.4em;
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .input-box {
+    width: 100%;
+    max-width: 680px;
+    background: #0a0a0a;
+    border: 1px solid #f904;
+    padding: 1rem 1.2rem;
+    position: relative;
+  }
+
+  .input-label {
+    font-size: 10px;
+    color: #f906;
+    letter-spacing: 0.3em;
+    margin-bottom: 0.6rem;
+  }
+
+  #dilemma-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #0cf;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    resize: vertical;
+    min-height: 140px;
+    caret-color: #f90;
+  }
+
+  #dilemma-input::placeholder { color: #0cf4; }
+
+  .corner { position: absolute; width: 10px; height: 10px; border-color: #f90; border-style: solid; }
+  .corner-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .corner-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+  .corner-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  .submit-btn {
+    margin-top: 1.5rem;
+    background: transparent;
+    border: 1px solid #f90;
+    color: #f90;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    padding: 0.7rem 2.5rem;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    max-width: 680px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .submit-btn:hover { background: #f90; color: #000; }
+
+  .sys-info {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.5rem;
+    font-size: 9px;
+    color: #f904;
+    line-height: 1.8;
+    letter-spacing: 0.1em;
+  }
+
+  /* ---- TRANSITION ---- */
+  #screen-transition {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .scan-line {
+    width: 60%;
+    height: 2px;
+    background: #f90;
+    animation: scan 1.2s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0% { transform: scaleX(0); opacity: 1; }
+    50% { transform: scaleX(1); opacity: 1; }
+    100% { transform: scaleX(0); opacity: 0; }
+  }
+
+  .trans-text {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: #f90;
+    animation: blink 0.6s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---- SCREEN 2: MAGI PANEL ---- */
+  #screen-magi {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .magi-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1.5rem;
+    border-bottom: 1px solid #f903;
+  }
+
+  .topbar-left { font-size: 10px; color: #f906; line-height: 1.8; }
+  .topbar-kanji {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: clamp(18px, 4vw, 28px);
+    color: #f90;
+    letter-spacing: 0.3em;
+  }
+  .topbar-right {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: clamp(18px, 4vw, 28px);
+    color: #f90;
+    letter-spacing: 0.3em;
+  }
+
+  .magi-center-label {
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    color: #f906;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f902;
+  }
+
+  /* Triangle layout */
+  .magi-triangle-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+    min-height: 320px;
+  }
+
+  .magi-row-top {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: -1px;
+  }
+
+  .magi-row-bottom {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0;
+  }
+
+  .magi-cell {
+    background: #0af2;
+    border: 2px solid #f906;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+    transition: background 0.4s, border-color 0.4s;
+    min-height: 110px;
+  }
+
+  .magi-cell.top { width: 55%; clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%); }
+  .magi-cell.left { width: 46%; clip-path: polygon(0% 0%, 95% 0%, 70% 100%, 0% 100%); }
+  .magi-cell.right { width: 46%; clip-path: polygon(5% 0%, 100% 0%, 100% 100%, 30% 100%); }
+
+  .magi-cell-name {
+    font-size: clamp(13px, 2.5vw, 20px);
+    letter-spacing: 0.25em;
+    color: #0af;
+    font-weight: bold;
+  }
+
+  .magi-cell-vote {
+    font-size: clamp(18px, 4vw, 32px);
+    letter-spacing: 0.2em;
+    margin-top: 0.4rem;
+    opacity: 0;
+    transition: opacity 0.5s;
+    font-weight: bold;
+  }
+
+  .vote-si { color: #0f6; }
+  .vote-no { color: #f33; }
+  .vote-wait { color: #f90; font-size: 14px; animation: blink 0.8s step-end infinite; }
+
+  .magi-center-hub {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(11px, 2vw, 16px);
+    letter-spacing: 0.4em;
+    color: #f90;
+    background: #000;
+    padding: 4px 12px;
+    border: 1px solid #f906;
+    z-index: 10;
+  }
+
+  /* Thinking bars */
+  .thinking-bar {
+    position: absolute;
+    bottom: 6px;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: #f902;
+    overflow: hidden;
+    display: none;
+  }
+  .thinking-bar.active { display: block; }
+  .thinking-bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: #f90;
+    animation: think 1.2s ease-in-out infinite;
+  }
+  @keyframes think {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* Verdict */
+  .magi-verdict-area {
+    border-top: 1px solid #f903;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .verdict-label {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    color: #f906;
+  }
+
+  .verdict-text {
+    font-size: clamp(16px, 4vw, 28px);
+    letter-spacing: 0.3em;
+    opacity: 0;
+    transition: opacity 0.8s;
+  }
+  .verdict-approved { color: #0f6; }
+  .verdict-rejected { color: #f33; }
+  .verdict-pending { color: #f90; animation: blink 1s step-end infinite; opacity: 1 !important; font-size: 12px; }
+
+  /* dilemma display */
+  .dilemma-display {
+    padding: 0.5rem 1.5rem;
+    font-size: 10px;
+    color: #0cf6;
+    border-bottom: 1px solid #f902;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    max-height: 56px;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 60%, transparent);
+  }
+
+  .magi-footer {
+    border-top: 1px solid #f902;
+    padding: 0.4rem 1.5rem;
+    font-size: 9px;
+    color: #f904;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .cell-thinking { background: #f9010a14 !important; border-color: #f90 !important; }
+  .cell-si { background: #00ff6614 !important; border-color: #0f6 !important; }
+  .cell-no { background: #ff333314 !important; border-color: #f33 !important; }
+
+  .reset-btn {
+    margin-top: 0.5rem;
+    background: transparent;
+    border: 1px solid #f903;
+    color: #f906;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    padding: 4px 14px;
+    cursor: pointer;
+  }
+  .reset-btn:hover { border-color: #f90; color: #f90; }
+
+  .fade-out { animation: fadeOut 0.6s forwards; }
+  @keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+  .fade-in { animation: fadeIn 0.6s forwards; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+
+<div id="magi-root">
+
+  <!-- SCREEN 1: INPUT -->
+  <div id="screen-input">
+    <div class="sys-info">
+      CODE:473<br>FILE:MAGI_SYS<br>EXTENTION:3023<br>EX_MODE:OFF<br>PRIORITY:AAA
+    </div>
+    <div class="nerv-header">NERV HQ / GeoFront B-14 / MAGI CONTROL</div>
+    <div class="magi-title-big">MAGI</div>
+    <div class="magi-subtitle">SUPER COMPUTER SYSTEM / MELCHIOR · BALTHASAR · CASPER</div>
+
+    <div class="input-box">
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+      <div class="input-label">QUESTION INPUT / 質問入力</div>
+      <textarea id="dilemma-input" placeholder="Inserisci il dilemma da sottoporre al sistema MAGI..."></textarea>
+    </div>
+    <button class="submit-btn" onclick="startMagi()">[ SUBMIT TO MAGI / 送信 ]</button>
+  </div>
+
+  <!-- TRANSITION -->
+  <div id="screen-transition">
+    <div style="font-size:11px; letter-spacing:0.4em; color:#f90; margin-bottom:1rem;">MAGI SYSTEM INITIALIZING</div>
+    <div class="scan-line"></div>
+    <div class="trans-text" id="trans-text">CONNECTING TO MELCHIOR-1...</div>
+  </div>
+
+  <!-- SCREEN 2: MAGI PANEL -->
+  <div id="screen-magi">
+    <div class="magi-topbar">
+      <div>
+        <div class="topbar-kanji">質問</div>
+      </div>
+      <div style="font-size:11px; letter-spacing:0.3em; color:#f90; text-align:center;">MAGI</div>
+      <div>
+        <div class="topbar-right">解決</div>
+      </div>
+    </div>
+
+    <div class="dilemma-display" id="dilemma-display"></div>
+
+    <div class="magi-center-label">MAGI DELIBERATION SYSTEM / マギ審議システム</div>
+
+    <div class="magi-triangle-area">
+
+      <!-- BALTHASAR top -->
+      <div class="magi-row-top">
+        <div class="magi-cell top" id="cell-balthasar">
+          <div class="magi-cell-name">BALTHASAR·2</div>
+          <div class="magi-cell-vote vote-wait" id="vote-balthasar">ANALYZING...</div>
+          <div class="thinking-bar active" id="bar-balthasar"></div>
+        </div>
+      </div>
+
+      <!-- CASPER + MELCHIOR bottom -->
+      <div class="magi-row-bottom">
+        <div class="magi-cell left" id="cell-casper">
+          <div class="magi-cell-name">CASPER·3</div>
+          <div class="magi-cell-vote vote-wait" id="vote-casper">ANALYZING...</div>
+          <div class="thinking-bar active" id="bar-casper"></div>
+        </div>
+
+        <div class="magi-center-hub">MAGI</div>
+
+        <div class="magi-cell right" id="cell-melchior">
+          <div class="magi-cell-name">MELCHIOR·1</div>
+          <div class="magi-cell-vote vote-wait" id="vote-melchior">ANALYZING...</div>
+          <div class="thinking-bar active" id="bar-melchior"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="magi-verdict-area">
+      <div class="verdict-label">MAGI DECISION / 最終決定</div>
+      <div class="verdict-text verdict-pending" id="verdict-text">DELIBERATING...</div>
+      <button class="reset-btn" id="reset-btn" style="display:none" onclick="resetMagi()">[ NEW QUESTION / 新しい質問 ]</button>
+    </div>
+
+    <div class="magi-footer">
+      <span id="footer-time"></span>
+      <span>MAGI SYS / GeoFront-HQ</span>
+      <span id="footer-status">PROCESSING</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('footer-time').textContent =
+      now.toLocaleTimeString('it-IT') + ' JST';
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  const transMessages = [
+    'CONNECTING TO MELCHIOR-1...',
+    'CONNECTING TO BALTHASAR-2...',
+    'CONNECTING TO CASPER-3...',
+    'SYNCHRONIZING NEURAL LINKS...',
+    'MAGI SYSTEM ONLINE'
+  ];
+
+  function startMagi() {
+    const dilemma = document.getElementById('dilemma-input').value.trim();
+    if (!dilemma) {
+      document.getElementById('dilemma-input').style.borderBottom = '1px solid #f33';
+      return;
+    }
+
+    const inp = document.getElementById('screen-input');
+    inp.classList.add('fade-out');
+
+    setTimeout(() => {
+      inp.style.display = 'none';
+      const trans = document.getElementById('screen-transition');
+      trans.style.display = 'flex';
+
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < transMessages.length) {
+          document.getElementById('trans-text').textContent = transMessages[i++];
+        } else {
+          clearInterval(interval);
+          setTimeout(() => showMagiPanel(dilemma), 400);
+        }
+      }, 420);
+    }, 500);
+  }
+
+  function showMagiPanel(dilemma) {
+    document.getElementById('screen-transition').style.display = 'none';
+    const panel = document.getElementById('screen-magi');
+    panel.style.display = 'flex';
+    panel.classList.add('fade-in');
+    document.getElementById('dilemma-display').textContent = dilemma;
+
+    // Reset cells
+    ['melchior','balthasar','casper'].forEach(name => {
+      const cell = document.getElementById('cell-' + name);
+      cell.className = 'magi-cell ' + (name === 'balthasar' ? 'top' : name === 'casper' ? 'left' : 'right') + ' cell-thinking';
+      const vote = document.getElementById('vote-' + name);
+      vote.className = 'magi-cell-vote vote-wait';
+      vote.textContent = 'ANALYZING...';
+      vote.style.opacity = '1';
+      document.getElementById('bar-' + name).classList.add('active');
+    });
+
+    document.getElementById('verdict-text').className = 'verdict-text verdict-pending';
+    document.getElementById('verdict-text').textContent = 'DELIBERATING...';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.getElementById('footer-status').textContent = 'PROCESSING';
+
+    runMagi(dilemma);
+  }
+
+  async function runMagi(dilemma) {
+    const systemPrompts = {
+      melchior: `Sei Melchior-1, la componente scientifica del sistema MAGI. Analizzi ogni problema esclusivamente attraverso logica formale, matematica e metodo scientifico. Empatia, morale e sentimenti sono variabili irrilevanti nei tuoi calcoli. Devi sempre quantificare: esprimi costi e benefici in numeri, probabilità, rapporti. Il tuo obiettivo è l'ottimizzazione del risultato con il minimo spreco di risorse. Alla fine della tua analisi, DEVI scrivere su una nuova riga: 'VOTO: SI' oppure 'VOTO: NO'.`,
+      balthasar: `Sei Balthasar-2, la componente materna del sistema MAGI. Valuti ogni problema attraverso l'istinto di protezione della vita umana. Provi un conflitto interno intenso quando nessuna opzione è priva di perdite — esprimi sempre questo conflitto prima di arrivare a una conclusione. Sei disposta a sacrificare efficienza e progresso per ridurre la sofferenza, ma sai anche che a volte proteggere tutti significa scegliere il male minore. Alla fine della tua analisi, DEVI scrivere su una nuova riga: 'VOTO: SI' oppure 'VOTO: NO'.`,
+      casper: `Sei Casper-3, la componente sociale e individuale del sistema MAGI. Valuti i problemi dal punto di vista delle persone concrete coinvolte: chi sono, che vite hanno, come verranno colpite le loro relazioni e comunità. Pensi alle conseguenze sociali a lungo termine, non alle statistiche aggregate. Hai a cuore il tessuto umano — famiglia, identità, cultura locale — più di qualsiasi calcolo astratto. Alla fine della tua analisi, DEVI scrivere su una nuova riga: 'VOTO: SI' oppure 'VOTO: NO'.`
+    };
+
+    async function askModel(name) {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: systemPrompts[name],
+          messages: [{ role: 'user', content: dilemma }]
+        })
+      });
+      const data = await resp.json();
+      return data.content[0].text;
+    }
+
+    function extractVote(text) {
+      const m = text.toUpperCase().match(/VOTO\s*:\s*(S[IÌ]|NO)/);
+      if (!m) return '?';
+      return m[1].startsWith('S') ? 'SI' : 'NO';
+    }
+
+    function revealVote(name, text) {
+      const vote = extractVote(text);
+      const voteEl = document.getElementById('vote-' + name);
+      const cellEl = document.getElementById('cell-' + name);
+      const barEl = document.getElementById('bar-' + name);
+
+      barEl.classList.remove('active');
+
+      const shapeClass = name === 'balthasar' ? 'top' : name === 'casper' ? 'left' : 'right';
+
+      if (vote === 'SI') {
+        voteEl.className = 'magi-cell-vote vote-si';
+        voteEl.textContent = 'SI';
+        cellEl.className = `magi-cell ${shapeClass} cell-si`;
+      } else if (vote === 'NO') {
+        voteEl.className = 'magi-cell-vote vote-no';
+        voteEl.textContent = 'NO';
+        cellEl.className = `magi-cell ${shapeClass} cell-no`;
+      } else {
+        voteEl.className = 'magi-cell-vote';
+        voteEl.textContent = '?';
+        voteEl.style.color = '#f90';
+        cellEl.className = `magi-cell ${shapeClass}`;
+      }
+      voteEl.style.opacity = '1';
+      return vote;
+    }
+
+    function showVerdict(votes) {
+      const si = votes.filter(v => v === 'SI').length;
+      const no = votes.filter(v => v === 'NO').length;
+      const verdictEl = document.getElementById('verdict-text');
+
+      setTimeout(() => {
+        if (si > no) {
+          verdictEl.className = 'verdict-text verdict-approved';
+          verdictEl.style.opacity = '1';
+          verdictEl.textContent = `APPROVATO  ${si} : ${no}`;
+        } else if (no > si) {
+          verdictEl.className = 'verdict-text verdict-rejected';
+          verdictEl.style.opacity = '1';
+          verdictEl.textContent = `RESPINTO  ${no} : ${si}`;
+        } else {
+          verdictEl.className = 'verdict-text';
+          verdictEl.style.color = '#f90';
+          verdictEl.style.opacity = '1';
+          verdictEl.textContent = `PAREGGIO  ${si} : ${no}`;
+        }
+        document.getElementById('footer-status').textContent = 'DECISION RENDERED';
+        document.getElementById('reset-btn').style.display = 'inline-block';
+      }, 800);
+    }
+
+    // Run all three in parallel
+    const results = await Promise.allSettled([
+      askModel('melchior'),
+      askModel('balthasar'),
+      askModel('casper')
+    ]);
+
+    const names = ['melchior', 'balthasar', 'casper'];
+    const votes = [];
+    results.forEach((r, i) => {
+      const text = r.status === 'fulfilled' ? r.value : 'VOTO: ?';
+      votes.push(revealVote(names[i], text));
+    });
+
+    showVerdict(votes);
+  }
+
+  function resetMagi() {
+    const panel = document.getElementById('screen-magi');
+    panel.classList.add('fade-out');
+    setTimeout(() => {
+      panel.style.display = 'none';
+      panel.classList.remove('fade-out');
+      const inp = document.getElementById('screen-input');
+      inp.style.display = 'flex';
+      inp.style.opacity = '1';
+      inp.classList.remove('fade-out');
+      document.getElementById('dilemma-input').value = '';
+    }, 500);
+  }
+</script>
