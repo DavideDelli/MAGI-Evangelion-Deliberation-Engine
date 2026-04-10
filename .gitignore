@@ -1,0 +1,4 @@
+# Creiamo il file e inseriamo le cartelle/file da ignorare
+echo "venv/" > .gitignore
+echo ".env" >> .gitignore
+echo "__pycache__/" >> .gitignore  # Ottima pratica in Python per ignorare i file compilati
