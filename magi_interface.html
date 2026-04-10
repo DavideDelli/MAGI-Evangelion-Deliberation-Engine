@@ -11,401 +11,412 @@
       --orange: #ff9900;
       --orange-dim: #cc7a00;
       --green: #00ff00;
-      --green-dim: #008800;
+      --green-dim: #00aa00;
       --blue: #42bcf5;
-      --bg: #050505;
+      --bg: #020202;
       --font-tech: 'Share Tech Mono', monospace;
       --font-kanji: 'Noto Serif JP', serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg);
       color: var(--orange);
       font-family: var(--font-tech);
       height: 100vh;
+      width: 100vw;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
-      padding: 20px;
+      user-select: none;
     }
 
-    /* Effetto Scanline stile Monitor CRT */
     .scanlines {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      position: absolute; inset: 0;
       background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
       background-size: 100% 4px, 3px 100%;
-      z-index: 100;
-      pointer-events: none;
+      z-index: 100; pointer-events: none;
     }
 
-    /* Contenitore Principale con doppio bordo */
-    .magi-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 1600px;
-      height: 100%;
-      border: 6px solid var(--orange);
-      padding: 4px;
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
+    /* --- SCHERMATA 1: INPUT INIZIALE --- */
+    #screen-input {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      background: var(--bg); z-index: 50; transition: opacity 0.4s ease-out;
     }
 
-    .magi-inner {
-      border: 2px solid var(--orange);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      position: relative;
+    .input-box-wrapper {
+      width: 60vw; border: 2px solid var(--orange); padding: 2rem;
+      background: rgba(255, 153, 0, 0.05); position: relative; box-shadow: inset 0 0 20px rgba(255,153,0,0.1);
     }
 
-    /* HEADER: Kanji e Linee Verdi */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      padding: 20px 40px;
+    .input-title { font-size: 1.8vw; letter-spacing: 0.2em; margin-bottom: 1rem; color: var(--orange); text-align: center; font-weight: bold; }
+
+    textarea#dilemma-init {
+      width: 100%; height: 20vh; background: transparent; border: 1px solid var(--orange-dim);
+      color: var(--blue); font-family: var(--font-tech); font-size: 1.2vw; resize: none; outline: none; padding: 1rem;
+    }
+    textarea#dilemma-init:focus { border-color: var(--orange); box-shadow: 0 0 15px rgba(255,153,0,0.2); }
+    
+    .btn-start {
+      margin-top: 1.5rem; padding: 1vh 2vw; background: transparent; border: 2px solid var(--orange); color: var(--orange);
+      font-family: var(--font-tech); font-size: 1.2vw; cursor: pointer; transition: 0.2s; letter-spacing: 0.1em; width: 100%;
+    }
+    .btn-start:hover { background: var(--orange); color: #000; }
+
+    /* --- SCHERMATA 2: MAGI MAIN SYSTEM --- */
+    #screen-magi {
+      position: absolute; inset: 0;
+      display: none; padding: 1.5vw; opacity: 0; transition: opacity 0.4s ease-in;
     }
 
-    .kanji-title {
-      font-family: var(--font-kanji);
-      font-size: clamp(4rem, 8vw, 7rem);
-      color: var(--orange);
-      line-height: 1;
-      letter-spacing: 0.1em;
-      text-shadow: 2px 2px 0px #000, 0 0 15px rgba(255,153,0,0.5);
+    .magi-wrapper { width: 100%; height: 100%; border: 0.4vw solid var(--orange); padding: 0.3vw; position: relative; }
+    .magi-inner { border: 0.2vw solid var(--orange); height: 100%; position: relative; overflow: hidden; }
+
+    /* Testi e Decorazioni NERV in background */
+    .kanji-header-left { position: absolute; top: 2vh; left: 3vw; font-family: var(--font-kanji); font-size: 5vw; color: var(--orange); text-shadow: 2px 2px 0px #000; z-index: 2;}
+    .kanji-header-right { position: absolute; top: 2vh; right: 3vw; font-family: var(--font-kanji); font-size: 5vw; color: var(--orange); text-shadow: 2px 2px 0px #000; z-index: 2;}
+    
+    .green-stripes {
+      position: absolute; top: 14vh; left: 1vw; right: 1vw;
+      border-top: 0.3vw solid var(--green); border-bottom: 0.1vw solid var(--green); height: 1vh; opacity: 0.8; z-index: 1;
     }
 
-    .green-lines {
-      border-top: 3px solid var(--green);
-      border-bottom: 1px solid var(--green);
-      height: 10px;
-      margin-top: 10px;
-      width: 100%;
-      box-shadow: 0 0 10px rgba(0,255,0,0.3);
-    }
-
-    /* INFO SYSTEM (Sinistra e Destra) */
-    .system-info-left {
-      position: absolute;
-      top: 150px;
-      left: 40px;
-      font-size: 1.2rem;
-      line-height: 1.5;
-    }
-    .system-info-left .code { font-size: 2rem; margin-bottom: 10px; font-weight: bold; }
+    .system-info-left { position: absolute; top: 17vh; left: 3vw; font-size: 1.1vw; line-height: 1.3; z-index: 2;}
+    .system-info-left .code { font-size: 2.2vw; margin-bottom: 0.5vh; font-weight: bold; }
 
     .system-info-right {
-      position: absolute;
-      top: 170px;
-      right: 40px;
-      border: 2px solid var(--blue);
-      padding: 10px 20px;
-      font-family: var(--font-kanji);
-      font-size: 3rem;
-      color: var(--blue);
-      text-align: center;
-      box-shadow: inset 0 0 15px rgba(66, 188, 245, 0.2);
+      position: absolute; top: 17vh; right: 3vw; border: 0.15vw solid var(--blue); padding: 0.5vh 2vw;
+      font-family: var(--font-kanji); font-size: 3vw; color: var(--blue); z-index: 2; text-shadow: 0 0 10px rgba(66, 188, 245, 0.4); box-shadow: inset 0 0 15px rgba(66, 188, 245, 0.2);
+    }
+    
+    .system-info-right.verdict-approved { color: var(--green); border-color: var(--green); text-shadow: 0 0 15px rgba(0,255,0,0.5); box-shadow: inset 0 0 15px rgba(0,255,0,0.2); }
+    .system-info-right.verdict-rejected { color: #ff3333; border-color: #ff3333; text-shadow: 0 0 15px rgba(255,51,51,0.5); box-shadow: inset 0 0 15px rgba(255,51,51,0.2); }
+
+    /* SVG per Y Rovesciata (Linee Arancioni che collegano i pannelli passando SOTTO) */
+    .magi-svg-lines {
+      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; /* Dietro i pannelli! */
     }
 
-    /* AREA PANNELLI CENTRALI */
-    .panels-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      margin-top: -50px;
-    }
-
-    /* Tagli geometrici dei pannelli */
-    .panel {
-      background-color: var(--blue);
-      color: #000;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-      font-family: sans-serif;
-      text-transform: uppercase;
-      transition: background-color 0.3s, transform 0.1s;
-      position: absolute;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
-    }
-
-    .panel-name { font-size: clamp(1.5rem, 3vw, 3rem); letter-spacing: 0.1em; }
-    .panel-vote { font-size: clamp(2rem, 4vw, 4rem); margin-top: 10px; display: none; }
-
-    /* BALTHASAR (Top Center) */
-    #panel-balthasar {
-      width: 40%;
-      height: 250px;
-      top: 0;
-      clip-path: polygon(0 0, 100% 0, 100% 70%, 75% 100%, 25% 100%, 0 70%);
-    }
-
-    /* CASPER (Bottom Left) */
-    #panel-casper {
-      width: 38%;
-      height: 250px;
-      bottom: 0;
-      left: 5%;
-      clip-path: polygon(0 0, 75% 0, 100% 30%, 100% 70%, 75% 100%, 0 100%);
-    }
-
-    /* MELCHIOR (Bottom Right) */
-    #panel-melchior {
-      width: 38%;
-      height: 250px;
-      bottom: 0;
-      right: 5%;
-      clip-path: polygon(25% 0, 100% 0, 100% 100%, 25% 100%, 0 70%, 0 30%);
-    }
-
-    /* Hexagon Center */
+    /* Centro MAGI: Rimossa la background nera che sfalsava il layout! */
     .magi-center {
-      position: absolute;
-      font-family: var(--font-kanji);
-      font-size: 3rem;
-      color: var(--orange);
-      font-weight: 900;
-      letter-spacing: 0.2em;
-      top: 55%;
-      text-shadow: 0 0 15px rgba(255,153,0,0.8);
+      position: absolute; top: 54vh; left: 50vw; transform: translate(-50%, -50%);
+      font-family: var(--font-kanji); font-size: 4.5vw; color: var(--orange); font-weight: 900;
+      letter-spacing: 0.2em; text-shadow: 0 0 20px rgba(255,153,0,1); z-index: 10; 
     }
 
-    /* FOOTER / TERMINAL INPUT */
+    /* PANNELLI - Posizionamento e Geometria Assoluta Collineare */
+    .panel {
+      position: absolute; background-color: var(--blue); color: #000;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      font-weight: bold; text-transform: uppercase; z-index: 5;
+      box-shadow: inset 0 0 2vw rgba(0,0,0,0.4); transition: background-color 0.1s, transform 0.2s, filter 0.2s;
+    }
+
+    .panel-name { font-size: 3vw; letter-spacing: 0.1em; }
+    .panel-vote { font-size: 4vw; margin-top: 1vh; display: none; }
+
+    /* GEOMETRIA MATEMATICA PERFETTA: I tagli sono perfettamente paralleli e lasciano una "Y" vuota esatta */
+    #panel-balthasar {
+      top: 8vh; left: 28vw; width: 44vw; height: 35vh;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10vh), calc(100% - 8vw) 100%, 8vw 100%, 0 calc(100% - 10vh));
+    }
+    
+    #panel-casper {
+      bottom: 12vh; left: 2vw; width: 42vw; height: 32vh;
+      clip-path: polygon(0 0, calc(100% - 8vw) 0, 100% 10vh, 100% 100%, 0 100%);
+    }
+    
+    #panel-melchior {
+      bottom: 12vh; right: 2vw; width: 42vw; height: 32vh;
+      clip-path: polygon(8vw 0, 100% 0, 100% 100%, 0 100%, 0 10vh);
+    }
+
+    /* Stati dei Pannelli */
+    @keyframes blink-bg { 0%, 100% { background-color: var(--orange); } 50% { background-color: var(--orange-dim); } }
+    .analyzing { animation: blink-bg 0.5s infinite; }
+    .vote-si { background-color: var(--green) !important; box-shadow: inset 0 0 4vw rgba(0,0,0,0.5); }
+    .vote-no { background-color: #ff3333 !important; box-shadow: inset 0 0 4vw rgba(0,0,0,0.5); }
+
+    /* Hover effect per cliccare le motivazioni */
+    .panel.clickable:hover { cursor: pointer; filter: brightness(1.2); }
+    #panel-balthasar.clickable:hover { transform: scale(1.02); } 
+    #panel-casper.clickable:hover { transform: scale(1.02); }
+    #panel-melchior.clickable:hover { transform: scale(1.02); }
+
+    /* FOOTER Terminale */
     .terminal-footer {
-      border-top: 2px solid var(--orange);
-      padding: 10px 20px;
-      font-size: 1.2rem;
-      background: #000;
-      z-index: 20;
+      position: absolute; bottom: 0; left: 0; right: 0;
+      border-top: 0.2vw solid var(--orange); padding: 1vh 2vw; font-size: 0.9vw; background: #000; z-index: 20;
     }
+    .terminal-line { display: flex; margin-bottom: 0.5vh; }
+    .terminal-label { width: 10vw; color: var(--orange); flex-shrink: 0; }
+    .terminal-value { color: var(--orange); flex: 1; padding-bottom: 0.2vh; border-bottom: 1px dotted var(--orange-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .terminal-value span { color: var(--blue); } 
 
-    .terminal-line {
-      display: flex;
-      margin-bottom: 5px;
-      align-items: flex-start;
+    /* --- MODALE (Finestra Motivazioni) --- */
+    #modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200;
+      justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(3px);
     }
-
-    .terminal-label {
-      width: 150px;
-      color: var(--orange);
-      flex-shrink: 0;
+    .modal-box {
+      width: 60vw; max-height: 80vh; background: var(--bg); border: 0.2vw solid var(--blue); padding: 2vw; position: relative;
+      box-shadow: 0 0 3vw rgba(66, 188, 245, 0.2); display: flex; flex-direction: column;
     }
-
-    .terminal-value {
-      color: var(--orange);
-      border-bottom: 1px dotted var(--orange-dim);
-      flex: 1;
-      min-height: 1.5rem;
-    }
-
-    textarea#dilemma-input {
-      width: 100%;
-      background: transparent;
-      border: 1px solid var(--orange-dim);
-      color: var(--blue);
-      font-family: var(--font-tech);
-      font-size: 1.2rem;
-      resize: none;
-      outline: none;
-      padding: 5px;
-      height: 60px;
-    }
+    .modal-title { font-size: 2.5vw; color: var(--blue); border-bottom: 0.1vw solid var(--blue); padding-bottom: 1vh; margin-bottom: 2vh; letter-spacing: 0.1em; font-weight: bold;}
+    .modal-text { font-size: 1.2vw; line-height: 1.6; color: #fff; overflow-y: auto; padding-right: 1vw; white-space: pre-wrap; flex: 1;}
+    .modal-close { position: absolute; top: 1vw; right: 1.5vw; color: var(--blue); font-size: 2vw; cursor: pointer; }
+    .modal-close:hover { color: #fff; }
     
-    textarea#dilemma-input:focus {
-      border-color: var(--orange);
-      box-shadow: 0 0 10px rgba(255,153,0,0.2);
-    }
+    .modal-text::-webkit-scrollbar { width: 0.5vw; }
+    .modal-text::-webkit-scrollbar-track { background: #111; }
+    .modal-text::-webkit-scrollbar-thumb { background: var(--blue); }
 
-    /* Animations & States */
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .analyzing { animation: blink 1s infinite; background-color: var(--orange) !important; }
-    
-    .vote-si { background-color: #00ff66 !important; }
-    .vote-no { background-color: #ff3333 !important; }
-    
-    .verdict-approved { color: #00ff66 !important; text-shadow: 0 0 20px rgba(0,255,102,0.8); }
-    .verdict-rejected { color: #ff3333 !important; text-shadow: 0 0 20px rgba(255,51,51,0.8); }
-    
-    button#submit-btn {
-      display: none; /* Nascondiamo il bottone, inviamo con Invio */
-    }
-
-    .instruction {
-      font-size: 0.8rem;
-      color: var(--orange-dim);
-      text-align: right;
-      margin-top: 5px;
-    }
   </style>
 </head>
 <body>
 
   <div class="scanlines"></div>
 
-  <div class="magi-wrapper">
-    <div class="magi-inner">
-      
-      <!-- HEADER -->
-      <div class="header">
-        <div style="width: 35%;">
-          <div class="kanji-title">質 問</div>
-          <div class="green-lines"></div>
-        </div>
-        <div style="width: 35%; text-align: right;">
-          <div class="kanji-title">解 決</div>
-          <div class="green-lines"></div>
-        </div>
-      </div>
+  <!-- SCHERMATA 1: INPUT -->
+  <div id="screen-input">
+    <div class="input-box-wrapper">
+      <div class="input-title">MAGI DELIBERATION SYSTEM / 新しい質問</div>
+      <textarea id="dilemma-init" placeholder="Inserisci il dilemma da sottoporre ai tre Magi..." autofocus></textarea>
+      <button class="btn-start" onclick="avviaMAGI()">[ EXECUTE DELIBERATION ]</button>
+    </div>
+  </div>
 
-      <!-- SYSTEM INFO -->
-      <div class="system-info-left">
-        <div class="code">CODE:473</div>
-        FILE:MAGI_SYS<br>
-        EXTENTION:3023<br>
-        EX_MODE:OFF<br>
-        PRIORITY:AAA
-      </div>
-
-      <!-- RISULTATO FINALE -->
-      <div class="system-info-right" id="final-result-box">
-        情 報
-      </div>
-
-      <!-- PANELS AREA -->
-      <div class="panels-area">
+  <!-- SCHERMATA 2: MAIN SYSTEM -->
+  <div id="screen-magi">
+    <div class="magi-wrapper">
+      <div class="magi-inner">
         
-        <div class="panel" id="panel-balthasar">
+        <div class="kanji-header-left">質 問</div>
+        <div class="kanji-header-right">解 決</div>
+        <div class="green-stripes"></div>
+
+        <div class="system-info-left">
+          <div class="code">CODE:473</div>
+          FILE:MAGI_SYS<br>EXTENTION:3023<br>EX_MODE:OFF<br>PRIORITY:AAA
+        </div>
+
+        <div class="system-info-right" id="final-result-box">情 報</div>
+
+        <!-- LINEE VETTORIALI CALCOLATE ALGEBRICAMENTE: Passano al centro esatto dei vuoti lasciati dai tagli -->
+        <svg class="magi-svg-lines">
+          <!-- Linea verticale su (verso Balthasar) -->
+          <line x1="50vw" y1="54vh" x2="50vw" y2="42vh" stroke="var(--orange)" stroke-width="1.5vw" stroke-linecap="square" />
+          <!-- Linea diagonale sinistra (verso Casper) -->
+          <line x1="50vw" y1="54vh" x2="38vw" y2="69vh" stroke="var(--orange)" stroke-width="1.5vw" stroke-linecap="square" />
+          <!-- Linea diagonale destra (verso Melchior) -->
+          <line x1="50vw" y1="54vh" x2="62vw" y2="69vh" stroke="var(--orange)" stroke-width="1.5vw" stroke-linecap="square" />
+        </svg>
+
+        <div class="magi-center">MAGI</div>
+
+        <!-- PANNELLI CLICCABILI (Angoli geometricamente perfetti) -->
+        <div class="panel" id="panel-balthasar" onclick="apriModale('BALTHASAR・2', testiModelli.balthasar)">
           <div class="panel-name">BALTHASAR・2</div>
           <div class="panel-vote" id="vote-balthasar"></div>
         </div>
 
-        <div class="panel" id="panel-casper">
+        <div class="panel" id="panel-casper" onclick="apriModale('CASPER・3', testiModelli.casper)">
           <div class="panel-name">CASPER・3</div>
           <div class="panel-vote" id="vote-casper"></div>
         </div>
 
-        <div class="panel" id="panel-melchior">
+        <div class="panel" id="panel-melchior" onclick="apriModale('MELCHIOR・1', testiModelli.melchior)">
           <div class="panel-name">MELCHIOR・1</div>
           <div class="panel-vote" id="vote-melchior"></div>
         </div>
 
-        <div class="magi-center">MAGI</div>
-
-      </div>
-
-      <!-- TERMINAL INPUT -->
-      <div class="terminal-footer">
-        <div class="terminal-line">
-          <div class="terminal-label">access code:</div>
-          <div class="terminal-value">******************************</div>
-        </div>
-        <div class="terminal-line">
-          <div class="terminal-label">question:</div>
-          <div class="terminal-value" style="border: none;">
-            <textarea id="dilemma-input" placeholder="Inserisci il dilemma qui e premi SHIFT + INVIO per deliberare..."></textarea>
+        <!-- FOOTER -->
+        <div class="terminal-footer">
+          <div class="terminal-line">
+            <div class="terminal-label">access code:</div>
+            <div class="terminal-value">******************************</div>
+          </div>
+          <div class="terminal-line">
+            <div class="terminal-label">question:</div>
+            <div class="terminal-value"><span id="dilemma-display"></span></div>
           </div>
         </div>
-        <div class="instruction">PRESS [SHIFT + ENTER] TO EXECUTE</div>
-      </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE MOTIVAZIONI -->
+  <div id="modal-overlay" onclick="chiudiModale(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-close" onclick="chiudiModale(event)">&times;</div>
+      <div class="modal-title" id="modal-title">NOME_IA</div>
+      <div class="modal-text" id="modal-text"></div>
     </div>
   </div>
 
   <script>
-    // Gestione dell'invio tramite SHIFT + ENTER
-    document.getElementById('dilemma-input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && e.shiftKey) {
-        e.preventDefault(); // Evita di andare a capo
-        startDeliberation();
-      }
+    // --- 1. SINTETIZZATORE AUDIO PROCEDURALE (Web Audio API) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playTone(freq, type, duration, vol=0.1) {
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    let processingInterval;
+    function playClick() { playTone(1200, 'square', 0.05, 0.02); }
+    function playStart() { playTone(400, 'sawtooth', 0.4, 0.1); setTimeout(()=>playTone(600, 'square', 0.6, 0.1), 200); }
+    function playVote() { playTone(800, 'sine', 0.2, 0.1); }
+    function playFinalApprove() { playTone(500, 'square', 0.1, 0.1); setTimeout(()=>playTone(1000, 'square', 0.8, 0.1), 100); }
+    function playFinalReject() { playTone(300, 'sawtooth', 0.1, 0.1); setTimeout(()=>playTone(200, 'sawtooth', 0.8, 0.1), 100); }
+    
+    function startProcessingHum() {
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      processingInterval = setInterval(() => {
+        playTone(300, 'triangle', 0.1, 0.03);
+        setTimeout(() => playTone(350, 'triangle', 0.1, 0.03), 150);
+      }, 500);
+    }
+    function stopProcessingHum() { clearInterval(processingInterval); }
+
+    document.getElementById('dilemma-init').addEventListener('keydown', (e) => {
+      playClick();
+      if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); avviaMAGI(); }
     });
 
-    async function startDeliberation() {
-      const dilemmaText = document.getElementById('dilemma-input').value.trim();
+    // --- 2. LOGICA APPLICATIVA E COLLEGAMENTO PYTHON BACKEND ---
+    let testiModelli = { melchior: "", balthasar: "", casper: "" };
+
+    function avviaMAGI() {
+      const dilemmaText = document.getElementById('dilemma-init').value.trim();
       if (!dilemmaText) return;
 
-      // Reset interfaccia per l'analisi
+      playStart();
+
+      document.getElementById('screen-input').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('screen-input').style.display = 'none';
+        document.getElementById('screen-magi').style.display = 'block';
+        setTimeout(() => document.getElementById('screen-magi').style.opacity = '1', 50);
+        
+        document.getElementById('dilemma-display').textContent = dilemmaText;
+        eseguiDeliberazione(dilemmaText);
+      }, 400);
+    }
+
+    async function eseguiDeliberazione(dilemmaText) {
+      startProcessingHum();
       const panels = ['melchior', 'balthasar', 'casper'];
+      
       panels.forEach(p => {
         const panelEl = document.getElementById('panel-' + p);
         const voteEl = document.getElementById('vote-' + p);
-        
-        panelEl.className = 'panel analyzing'; // Diventa arancione lampeggiante
+        panelEl.className = 'panel analyzing';
+        panelEl.classList.remove('clickable');
         voteEl.style.display = 'block';
         voteEl.textContent = 'ANALYZING...';
         voteEl.style.color = '#000';
       });
 
       const resultBox = document.getElementById('final-result-box');
-      resultBox.textContent = '計 算 中'; // "Calcolando" in Kanji
+      resultBox.textContent = '計 算 中'; 
       resultBox.className = 'system-info-right';
 
       try {
-        // Chiamata al backend Python FastAPI
+        // Chiama lo script Python (magi.py)
         const response = await fetch('/api/delibera', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dilemma: dilemmaText })
         });
 
-        if (!response.ok) throw new Error("Errore dal server");
+        if (!response.ok) throw new Error("Errore backend FastAPI");
         const data = await response.json();
 
-        // Funzione per applicare il voto alla UI
-        function applyVote(name, vote) {
-          const panelEl = document.getElementById('panel-' + name);
-          const voteEl = document.getElementById('vote-' + name);
-          
-          panelEl.className = 'panel'; // Rimuove analyzing
-          
-          if (vote === 'SI') {
-            panelEl.classList.add('vote-si');
-            voteEl.textContent = '[ SI ]';
-          } else if (vote === 'NO') {
-            panelEl.classList.add('vote-no');
-            voteEl.textContent = '[ NO ]';
-          } else {
-            voteEl.textContent = '[ ERR ]';
-          }
+        stopProcessingHum();
+        
+        testiModelli.melchior = data.melchior_testo || "Analisi non disponibile.";
+        testiModelli.balthasar = data.balthasar_testo || "Analisi non disponibile.";
+        testiModelli.casper = data.casper_testo || "Analisi non disponibile.";
+
+        // Rivelazione in cascata dei voti
+        function revealVote(name, vote, delay) {
+          setTimeout(() => {
+            const panelEl = document.getElementById('panel-' + name);
+            const voteEl = document.getElementById('vote-' + name);
+            panelEl.className = 'panel clickable';
+            playVote(); 
+
+            if (vote === 'SI') {
+              panelEl.classList.add('vote-si');
+              voteEl.textContent = '[ SI ]';
+            } else if (vote === 'NO') {
+              panelEl.classList.add('vote-no');
+              voteEl.textContent = '[ NO ]';
+            } else {
+              voteEl.textContent = '[ ERR ]';
+            }
+          }, delay);
         }
 
-        // Applica i risultati
-        applyVote('melchior', data.melchior_voto);
-        applyVote('balthasar', data.balthasar_voto);
-        applyVote('casper', data.casper_voto);
+        revealVote('balthasar', data.balthasar_voto, 100);
+        revealVote('casper', data.casper_voto, 600);
+        revealVote('melchior', data.melchior_voto, 1100);
 
-        // Aggiorna il box "Informazioni" in alto a destra
+        // Giudizio finale
         setTimeout(() => {
           if (data.decisione_finale.includes("APPROVATO")) {
-            resultBox.textContent = '承 認'; // Approvato
+            playFinalApprove();
+            resultBox.textContent = '承 認'; 
             resultBox.classList.add('verdict-approved');
           } else {
-            resultBox.textContent = '拒 否'; // Respinto
+            playFinalReject();
+            resultBox.textContent = '拒 否'; 
             resultBox.classList.add('verdict-rejected');
           }
-        }, 500);
+        }, 1800);
 
       } catch (error) {
-        console.error("Errore di connessione a MAGI:", error);
-        resultBox.textContent = 'ERRORE';
+        console.error("Errore di connessione col backend:", error);
+        stopProcessingHum();
+        resultBox.textContent = 'ERROR';
         resultBox.style.color = '#ff3333';
         panels.forEach(p => document.getElementById('panel-' + p).className = 'panel');
       }
     }
-  </script>
 
+    // --- LOGICA MODALE (Visualizzazione analisi LangGraph) ---
+    function apriModale(nome, testo) {
+      if(!testo || testo === "") return; 
+      playClick();
+      document.getElementById('modal-title').textContent = nome;
+      let formattedText = testo.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      document.getElementById('modal-text').innerHTML = formattedText;
+      
+      const modal = document.getElementById('modal-overlay');
+      modal.style.display = 'flex';
+      setTimeout(() => modal.style.opacity = '1', 10);
+    }
+
+    function chiudiModale(event) {
+      playClick();
+      const modal = document.getElementById('modal-overlay');
+      modal.style.opacity = '0';
+      setTimeout(() => modal.style.display = 'none', 200);
+    }
+  </script>
 </body>
 </html>

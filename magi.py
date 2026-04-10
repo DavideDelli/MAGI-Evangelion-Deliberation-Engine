@@ -286,10 +286,16 @@ def api_delibera(req: DilemmaRequest):
     result = magi_system.invoke({"dilemma": req.dilemma})
     
     # Prepariamo la risposta per il Javascript
+    # Prepariamo la risposta per il Javascript
     return {
         "melchior_voto": estrai_voto(result["melchior_response"]),
         "balthasar_voto": estrai_voto(result["balthasar_response"]),
         "casper_voto": estrai_voto(result["casper_response"]),
+        # AGGIUNGI QUESTE TRE RIGHE:
+        "melchior_testo": result["melchior_response"],
+        "balthasar_testo": result["balthasar_response"],
+        "casper_testo": result["casper_response"],
+        
         "decisione_finale": result["final_decision"]
     }
 
