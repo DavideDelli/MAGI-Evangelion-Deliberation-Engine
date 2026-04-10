@@ -2,14 +2,13 @@ import os
 import re
 import json
 import time
+import asyncio
 import uvicorn
 from datetime import datetime
 from typing import TypedDict
 from dotenv import load_dotenv
-from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, START, END
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
@@ -77,9 +76,9 @@ Hai a cuore il tessuto umano — famiglia, identità, cultura locale — più di
 
 # --- FUNZIONI DI SUPPORTO ---
 
-def ask_agent(persona_desc: str, dilemma: str, modello, max_retries: int = 3) -> tuple[str, float]:
+async def ask_agent(persona_desc: str, dilemma: str, modello, max_retries: int = 3) -> tuple[str, float]:
     """
-    Invia il dilemma al modello con la personalità specificata.
+    Invia il dilemma al modello con la personalità specificata in modo ASINCRONO.
     Restituisce (risposta, secondi_impiegati).
     In caso di errore temporaneo, ritenta con backoff lineare.
     """
@@ -98,14 +97,14 @@ def ask_agent(persona_desc: str, dilemma: str, modello, max_retries: int = 3) ->
     for attempt in range(max_retries):
         try:
             t_start = time.perf_counter()
-            response = chain.invoke({"dilemma": dilemma})
+            response = await chain.ainvoke({"dilemma": dilemma})
             elapsed = round(time.perf_counter() - t_start, 2)
             return response.content, elapsed
         except Exception as e:
             if attempt < max_retries - 1:
                 wait = 10 * (attempt + 1)  # 10s, 20s, 30s
                 print(f"   ⚠️  Errore ({e.__class__.__name__}), retry {attempt + 1}/{max_retries} tra {wait}s...")
-                time.sleep(wait)
+                await asyncio.sleep(wait)
             else:
                 raise
 
@@ -211,21 +210,21 @@ def salva_log(state: MAGIState) -> None:
 
 # --- NODI DEL GRAFO ---
 
-def melchior_node(state: MAGIState):
+async def melchior_node(state: MAGIState):
     print("🧠 Melchior sta elaborando...")
-    response, elapsed = ask_agent(DESC_MELCHIOR, state["dilemma"], llm_melchior)
+    response, elapsed = await ask_agent(DESC_MELCHIOR, state["dilemma"], llm_melchior)
     print(f"   ✓ Melchior: {elapsed}s")
     return {"melchior_response": response, "melchior_elapsed": elapsed}
 
-def balthasar_node(state: MAGIState):
+async def balthasar_node(state: MAGIState):
     print("🤱 Balthasar sta elaborando...")
-    response, elapsed = ask_agent(DESC_BALTHASAR, state["dilemma"], llm_balthasar)
+    response, elapsed = await ask_agent(DESC_BALTHASAR, state["dilemma"], llm_balthasar)
     print(f"   ✓ Balthasar: {elapsed}s")
     return {"balthasar_response": response, "balthasar_elapsed": elapsed}
 
-def casper_node(state: MAGIState):
+async def casper_node(state: MAGIState):
     print("💃 Casper sta elaborando...")
-    response, elapsed = ask_agent(DESC_CASPER, state["dilemma"], llm_casper)
+    response, elapsed = await ask_agent(DESC_CASPER, state["dilemma"], llm_casper)
     print(f"   ✓ Casper: {elapsed}s")
     return {"casper_response": response, "casper_elapsed": elapsed}
 
@@ -296,12 +295,12 @@ def serve_frontend():
     return FileResponse("magi_interface.html")
 
 @app.post("/api/delibera")
-def api_delibera(req: DilemmaRequest):
+async def api_delibera(req: DilemmaRequest):
     print("\n" + "="*50)
     print("🚀 RICHIESTA RICEVUTA DAL FRONTEND")
     print("="*50)
 
-    result = magi_system.invoke({"dilemma": req.dilemma})
+    result = await magi_system.ainvoke({"dilemma": req.dilemma})
 
     return {
         "melchior_voto":    estrai_voto(result["melchior_response"]),
