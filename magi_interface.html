@@ -8,11 +8,13 @@
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Serif+JP:wght@900&display=swap');
 
     :root {
-      --orange: #ff9900;
-      --orange-dim: #cc7a00;
-      --orange-dark: #221100;
+      /* Colori corretti basati sul frame originale dell'anime */
+      --orange: #ffb000;
+      --orange-dim: #b37b00;
+      --orange-dark: #332400;
       --green: #00ff00;
-      --blue-magi: #32bef6; 
+      --green-dim: #008000;
+      --blue-magi: #42bcf5; 
       --bg: #000000;
       --font-tech: 'Share Tech Mono', monospace;
       --font-kanji: 'Noto Serif JP', serif;
@@ -27,15 +29,16 @@
       height: 100vh; width: 100vw;
       overflow: hidden;
       display: flex; justify-content: center; align-items: center;
+      user-select: none;
     }
 
-    /* Effetto Scanline CRT più sottile */
+    /* Effetto CRT Scanline */
     .scanlines {
       position: absolute; inset: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
       background-size: 100% 4px;
       z-index: 1000; pointer-events: none;
-      opacity: 0.4;
+      opacity: 0.3;
     }
 
     /* --- SCHERMATA INPUT --- */
@@ -45,216 +48,265 @@
       background: var(--bg); z-index: 500; transition: opacity 0.5s ease;
     }
     .input-frame {
-      width: 600px; border: 3px solid var(--orange); padding: 40px;
-      background: rgba(255, 153, 0, 0.02); text-align: center;
+      width: 800px; border: 2px solid var(--orange); padding: 50px;
+      background: rgba(255, 176, 0, 0.03); text-align: center;
+      box-shadow: 0 0 20px rgba(255, 176, 0, 0.1) inset;
     }
+    .input-header-kanji { font-family: var(--font-kanji); font-size: 4rem; color: var(--orange); margin-bottom: 10px; }
     textarea#dilemma-init {
-      width: 100%; height: 180px; background: #050505; border: 1px solid var(--orange-dim);
-      color: var(--blue-magi); font-family: var(--font-tech); font-size: 1.2rem;
-      padding: 15px; outline: none; resize: none; margin: 20px 0;
+      width: 100%; height: 250px; background: #050505; border: 1px solid var(--orange-dim);
+      color: var(--blue-magi); font-family: var(--font-tech); font-size: 1.4rem;
+      padding: 20px; outline: none; resize: none; margin: 25px 0;
     }
     .btn-exec {
-      width: 100%; padding: 15px; background: transparent; border: 2px solid var(--orange);
-      color: var(--orange); cursor: pointer; font-size: 1.1rem; letter-spacing: 0.2em;
+      width: 100%; padding: 18px; background: transparent; border: 2px solid var(--orange);
+      color: var(--orange); cursor: pointer; font-size: 1.2rem; letter-spacing: 0.3em; font-weight: bold;
+      transition: all 0.2s;
     }
     .btn-exec:hover { background: var(--orange); color: #000; }
 
     /* --- INTERFACCIA MAGI --- */
     #screen-magi {
-      position: absolute; inset: 0; display: none; padding: 1.5vh; opacity: 0;
+      position: absolute; inset: 0; display: none; padding: 1.5vw; opacity: 0; transition: opacity 0.6s ease;
+    }
+    
+    /* Layout a bordi concentrici fedele all'originale */
+    .border-outer {
+      width: 100%; height: 100%; border: 3px solid var(--orange);
+      padding: 5px; position: relative;
+    }
+    .border-inner-1 {
+      width: 100%; height: 100%; border: 1px solid var(--orange);
+      padding: 8px; position: relative;
     }
     .main-wrapper {
-      width: 100%; height: 100%; border: 0.4vw solid var(--orange);
-      padding: 0.3vw; position: relative;
-    }
-    .inner-system {
-      width: 100%; height: 100%; border: 0.15vw solid var(--orange);
-      position: relative; overflow: hidden;
+      width: 100%; height: 100%; border: 2px solid var(--orange);
+      position: relative; overflow: hidden; background: var(--bg);
     }
 
-    /* Header e Kanji */
-    .header-kanji {
-      position: absolute; top: 1vh; left: 0; right: 0;
-      display: flex; justify-content: space-between; padding: 0 4vw;
-      font-family: var(--font-kanji); font-size: 5.5vw; z-index: 10;
+    /* Top Layout - HUD Text */
+    .hud-top-left {
+      position: absolute; top: 3vh; left: 3vw; width: 25vw; z-index: 10;
     }
-    .status-bar {
-      position: absolute; top: 13.5vh; left: 1vw; right: 1vw;
-      height: 0.8vh; border-top: 0.2vw solid var(--green); border-bottom: 0.1vw solid var(--green);
-      opacity: 0.6;
+    .hud-top-right {
+      position: absolute; top: 3vh; right: 3vw; width: 20vw; text-align: right; z-index: 10;
     }
 
-    /* Blocchi Dati */
-    .data-left { position: absolute; top: 17vh; left: 3vw; font-size: 1.1vw; line-height: 1.2; z-index: 10; }
-    .code-id { font-size: 2.8vw; font-weight: bold; margin-bottom: 5px; }
-
-    .data-right {
-      position: absolute; top: 20vh; right: 3vw; border: 0.2vw solid var(--blue-magi);
-      padding: 10px 35px; font-family: var(--font-kanji); font-size: 3.5vw; color: var(--blue-magi);
-      z-index: 10; transition: 0.3s;
-    }
-    .data-right.approved { color: var(--green); border-color: var(--green); text-shadow: 0 0 15px var(--green); }
-    .data-right.rejected { color: #ff3333; border-color: #ff3333; text-shadow: 0 0 15px #ff3333; }
-
-    /* --- ARCHITETTURA CENTRALE (IL CORE) --- */
-    /* Hub Centrale (Più piccolo per svuotare il centro) */
-    .central-hub {
-      position: absolute; top: 56%; left: 50%; transform: translate(-50%, -50%);
-      width: 15vw; height: 7vh; background: #000; border: 0.3vw solid var(--orange);
-      z-index: 30; display: flex; justify-content: center; align-items: center;
-      font-family: var(--font-kanji); font-size: 3.5vw; letter-spacing: 0.3em;
-      box-shadow: 0 0 40px rgba(0,0,0,1);
+    .kanji-title {
+      font-family: var(--font-kanji); font-size: 6vw; letter-spacing: 0.2em;
+      line-height: 1; margin-bottom: 5px;
     }
 
-    /* Ponti di Connessione */
-    .connector { position: absolute; background: var(--orange); z-index: 5; }
-    /* Ponte superiore più lungo per allontanare Balthasar */
-    .conn-top { top: 40vh; left: 50%; transform: translateX(-50%); width: 2.2vw; height: 12vh; }
-    /* Ponti diagonali più lunghi per allontanare Casper/Melchior */
-    .conn-left { top: 58vh; left: 33vw; width: 10vw; height: 2.2vw; transform: rotate(30deg); }
-    .conn-right { top: 58vh; right: 33vw; width: 10vw; height: 2.2vw; transform: rotate(-30deg); }
-
-    /* PANNELLI MAGI (Dimensioni ridotte rispetto a prima) */
-    .panel {
-      position: absolute; background: var(--blue-magi); color: #000;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      font-weight: 900; pointer-events: auto; z-index: 20;
-      box-shadow: inset 0 0 5vw rgba(0,0,0,0.3); transition: 0.2s;
-    }
-    .p-label { font-size: 2.4vw; letter-spacing: 0.05em; }
-    .p-vote { font-size: 3.2vw; margin-top: 10px; display: none; }
-
-    #balthasar {
-      top: 6vh; left: 50%; transform: translateX(-50%);
-      width: 30vw; height: 34vh;
-      clip-path: polygon(0 0, 100% 0, 100% 80%, 75% 100%, 25% 100%, 0 80%);
-    }
-    #casper {
-      bottom: 12vh; left: 2vw;
-      width: 38vw; height: 32vh;
-      clip-path: polygon(0 0, 75% 0, 100% 25%, 100% 100%, 0 100%);
-    }
-    #melchior {
-      bottom: 12vh; right: 2vw;
-      width: 38vw; height: 32vh;
-      clip-path: polygon(25% 0, 100% 0, 100% 100%, 0 100%, 0 25%);
+    /* Le doppie linee verdi locali */
+    .green-lines {
+      border-top: 3px solid var(--green);
+      border-bottom: 2px solid var(--green);
+      height: 10px; width: 100%; margin-bottom: 20px;
+      opacity: 0.8;
     }
 
-    /* Stati Visuali */
-    @keyframes analyzing-pulse { 0%, 100% { background: var(--orange); } 50% { background: var(--orange-dim); } }
-    .analyzing { animation: analyzing-pulse 0.4s infinite !important; }
-    .vote-si { background: var(--green) !important; }
-    .vote-no { background: #ff3333 !important; }
-    .clickable { cursor: pointer; }
-    .clickable:hover { filter: brightness(1.2); transform: scale(1.02); }
+    .data-left-block { font-size: 1vw; line-height: 1.2; letter-spacing: 0.05em; }
+    .code-id { font-size: 2.5vw; font-weight: 900; margin-bottom: 10px; letter-spacing: 0.1em;}
+
+    /* Box Info in alto a destra */
+    .data-right-box {
+      display: inline-block;
+      border: 3px solid var(--blue-magi);
+      padding: 5px 20px; font-family: var(--font-kanji); font-size: 3vw; color: var(--blue-magi);
+      transition: all 0.3s; margin-top: 10px;
+    }
+    .data-right-box.approved { color: var(--green); border-color: var(--green); text-shadow: 0 0 10px var(--green); box-shadow: 0 0 15px rgba(0,255,0,0.2) inset; }
+    .data-right-box.rejected { color: #ff3333; border-color: #ff3333; text-shadow: 0 0 10px #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.2) inset; }
+
+    /* --- CORE HARDWARE (SVG PIXEL PERFECT) --- */
+    #magi-hardware-container {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      z-index: 1; /* Sotto ai testi HUD top/bottom */
+    }
+
+    svg#magi-svg { width: 100%; height: 100%; }
+
+    /* Linee arancioni di connessione di background */
+    .magi-bg-line { fill: none; stroke: var(--orange); stroke-width: 15; stroke-linecap: square; }
+
+    /* Poligoni azzurri */
+    .magi-poly { 
+      fill: var(--blue-magi); stroke: var(--bg); stroke-width: 4; 
+      transition: fill 0.2s; cursor: pointer; 
+    }
+    .magi-poly:hover { filter: brightness(1.2); }
+
+    /* Testi interni ai poligoni */
+    .text-label { 
+      font-family: var(--font-tech); font-weight: 900; fill: #000; 
+      pointer-events: none; text-anchor: middle; font-size: 55px; 
+    }
+    .text-vote { 
+      font-family: var(--font-tech); font-weight: 900; fill: #000; 
+      pointer-events: none; text-anchor: middle; font-size: 50px; 
+      opacity: 0; transition: opacity 0.3s; 
+    }
+
+    /* Animazioni Stati */
+    @keyframes pulse-analyzing { 0%, 100% { fill: var(--orange); } 50% { fill: var(--orange-dim); } }
+    .analyzing { animation: pulse-analyzing 0.4s infinite !important; }
+    .vote-si { fill: var(--green) !important; }
+    .vote-no { fill: #ff3333 !important; }
+
+    /* Scritta centrale MAGI */
+    .magi-center-text {
+      position: absolute; top: 52.5%; left: 50%; transform: translate(-50%, -50%);
+      font-family: var(--font-kanji); color: var(--orange); font-size: 4.5vw;
+      letter-spacing: 0.15em; font-weight: 900; z-index: 5;
+    }
 
     /* Footer Terminale */
     .footer {
       position: absolute; bottom: 0; left: 0; right: 0;
-      border-top: 0.3vw solid var(--orange); background: #000;
-      padding: 0.8vh 3vw; font-size: 1.1vw; z-index: 100;
+      border-top: 2px solid var(--orange); background: #000;
+      padding: 1.5vh 3vw; font-size: 1vw; z-index: 10;
     }
-    .f-row { display: flex; margin-bottom: 2px; }
-    .f-lab { width: 12vw; color: var(--orange); font-weight: bold; }
-    .f-val { color: var(--orange); flex: 1; border-bottom: 1px dotted var(--orange-dim); overflow: hidden; white-space: nowrap; }
-    .f-val span { color: var(--blue-magi); font-weight: bold; }
+    /* Doppia linea del footer */
+    .footer::before {
+      content: ''; position: absolute; top: -6px; left: 0; right: 0;
+      border-top: 1px solid var(--orange); height: 1px;
+    }
+    
+    .f-row { display: flex; margin-bottom: 3px; align-items: flex-end; }
+    .f-lab { width: 10vw; color: var(--orange); font-weight: 900; }
+    .f-val { 
+      color: var(--orange); flex: 1; border-bottom: 1px dashed var(--orange-dim); 
+      overflow: hidden; white-space: nowrap; padding-bottom: 2px;
+    }
+    .f-val span { color: var(--orange); }
 
-    /* Modale */
+    /* Modale motivazioni */
     #modal-overlay {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000;
       justify-content: center; align-items: center; opacity: 0; transition: 0.3s;
     }
     .modal-box {
-      width: 70vw; max-height: 80vh; background: #050505; border: 2px solid var(--blue-magi);
-      padding: 40px; position: relative; display: flex; flex-direction: column;
+      width: 75vw; max-height: 80vh; background: #020202; border: 3px solid var(--blue-magi);
+      padding: 50px; position: relative; display: flex; flex-direction: column;
     }
-    .m-title { font-size: 2.5vw; color: var(--blue-magi); border-bottom: 2px solid var(--blue-magi); margin-bottom: 20px; font-family: var(--font-kanji); }
-    .m-body { font-size: 1.3vw; color: #fff; line-height: 1.6; overflow-y: auto; white-space: pre-wrap; }
-    .m-close { position: absolute; top: 15px; right: 20px; color: var(--blue-magi); font-size: 2.5vw; cursor: pointer; }
+    .m-title { font-size: 3vw; color: var(--blue-magi); border-bottom: 3px solid var(--blue-magi); margin-bottom: 25px; font-family: var(--font-kanji); }
+    .m-body { font-size: 1.5vw; color: #fff; line-height: 1.7; overflow-y: auto; white-space: pre-wrap; padding-right: 20px; }
+    .m-close { position: absolute; top: 20px; right: 30px; color: var(--blue-magi); font-size: 3vw; cursor: pointer; }
   </style>
 </head>
 <body>
 
   <div class="scanlines"></div>
 
-  <!-- INPUT -->
+  <!-- SCHERMATA INPUT -->
   <div id="screen-input">
     <div class="input-frame">
-      <div class="header-kanji" style="position:static; font-size:3rem; margin-bottom:10px;">質 問</div>
-      <div style="font-size:1.1rem; letter-spacing:0.2em;">MAGI DELIBERATION INPUT</div>
+      <div class="input-header-kanji">質 問</div>
+      <div style="font-size:1.3rem; letter-spacing:0.2em; margin-bottom:30px;">MAGI DELIBERATION INPUT</div>
       <textarea id="dilemma-init" placeholder="Inserisci il dilemma morale o strategico..." autofocus></textarea>
-      <button class="btn-exec" onclick="startMagi()">[ EXECUTE SYSTEM DELIBERATION ]</button>
+      <button class="btn-exec" onclick="startMagi()">[ EXECUTE DELIBERATION ]</button>
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- INTERFACCIA MAGI PRINCIPALE -->
   <div id="screen-magi">
-    <div class="main-wrapper">
-      <div class="inner-system">
-        
-        <div class="header-kanji">
-          <div>質 問</div>
-          <div>解 決</div>
-        </div>
-
-        <div class="status-bar"></div>
-
-        <div class="data-left">
-          <div class="code-id">CODE:473</div>
-          FILE:MAGI_SYS<br>EXTENSION:3023<br>EX_MODE:OFF<br>PRIORITY:AAA
-        </div>
-
-        <div class="data-right" id="final-result">情 報</div>
-
-        <!-- Assembly Strutturale (Connettori e Hub) -->
-        <div class="connector conn-top"></div>
-        <div class="connector conn-left"></div>
-        <div class="connector conn-right"></div>
-        <div class="central-hub">MAGI</div>
-
-        <!-- Pannelli Magi -->
-        <div class="panel" id="balthasar" onclick="openInfo('BALTHASAR・2')">
-          <div class="p-label">BALTHASAR・2</div>
-          <div id="v-balthasar" class="p-vote"></div>
-        </div>
-
-        <div class="panel" id="casper" onclick="openInfo('CASPER・3')">
-          <div class="p-label">CASPER・3</div>
-          <div id="v-casper" class="p-vote"></div>
-        </div>
-
-        <div class="panel" id="melchior" onclick="openInfo('MELCHIOR・1')">
-          <div class="p-label">MELCHIOR・1</div>
-          <div id="v-melchior" class="p-vote"></div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-          <div class="f-row">
-            <div class="f-lab">access code:</div>
-            <div class="f-val">************************************************************</div>
+    <div class="border-outer">
+      <div class="border-inner-1">
+        <div class="main-wrapper">
+          
+          <!-- HUD TOP LEFT -->
+          <div class="hud-top-left">
+            <div class="kanji-title">質 問</div>
+            <div class="green-lines"></div>
+            <div class="data-left-block">
+              <div class="code-id">CODE:473</div>
+              FILE:MAGI_SYS<br>EXTENSION:3023<br>EX_MODE:OFF<br>PRIORITY:AAA
+            </div>
           </div>
-          <div class="f-row">
-            <div class="f-lab">question:</div>
-            <div class="f-val"><span id="q-txt">---</span></div>
-          </div>
-        </div>
 
+          <!-- HUD TOP RIGHT -->
+          <div class="hud-top-right">
+            <div class="kanji-title">解 決</div>
+            <div class="green-lines"></div>
+            <div class="data-right-box" id="final-result">情 報</div>
+          </div>
+
+          <!-- Testo MAGI Centrale -->
+          <div class="magi-center-text">MAGI</div>
+
+          <!-- HARDWARE VETTORIALE (SVG 1920x1080 per precisione 16:9) -->
+          <div id="magi-hardware-container">
+            <!-- preserveAspectRatio="none" forza le proporzioni a riempire lo schermo, tipico dei terminali -->
+            <svg id="magi-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+              
+              <!-- LINEE DI CONNESSIONE ARANCIONI (BACKGROUND) -->
+              <!-- Linea orizzontale centrale sotto MAGI -->
+              <line class="magi-bg-line" x1="810" y1="800" x2="1110" y2="800" />
+              <!-- Diagonale sinistra -->
+              <line class="magi-bg-line" x1="575" y1="435" x2="835" y2="565" />
+              <!-- Diagonale destra -->
+              <line class="magi-bg-line" x1="1345" y1="435" x2="1085" y2="565" />
+
+
+              <!-- BLOCCO BALTHASAR (Centro - Alto) -->
+              <!-- Coordinate ricalcolate per maggior distanza -->
+              <polygon id="poly-balthasar" class="magi-poly" 
+                       points="600,60 1320,60 1320,350 1060,480 860,480 600,350" 
+                       onclick="openInfo('BALTHASAR・2', testiModelli.balthasar)"/>
+              
+              <text x="960" y="230" class="text-label">BALTHASAR • 2</text>
+              <text id="vote-balthasar" x="960" y="310" class="text-vote">[ SI ]</text>
+
+
+              <!-- BLOCCO CASPER (Sinistra - Basso) -->
+              <!-- Ancorato al bordo estremo sinistro -->
+              <polygon id="poly-casper" class="magi-poly" 
+                       points="0,520 550,520 810,650 810,1000 0,1000" 
+                       onclick="openInfo('CASPER・3', testiModelli.casper)"/>
+              
+              <text x="400" y="740" class="text-label">CASPER • 3</text>
+              <text id="vote-casper" x="400" y="820" class="text-vote">[ SI ]</text>
+
+
+              <!-- BLOCCO MELCHIOR (Destra - Basso) -->
+              <!-- Ancorato al bordo estremo destro -->
+              <polygon id="poly-melchior" class="magi-poly" 
+                       points="1920,520 1370,520 1110,650 1110,1000 1920,1000" 
+                       onclick="openInfo('MELCHIOR・1', testiModelli.melchior)"/>
+              
+              <text x="1520" y="740" class="text-label">MELCHIOR • 1</text>
+              <text id="vote-melchior" x="1520" y="820" class="text-vote">[ SI ]</text>
+
+            </svg>
+          </div>
+
+          <!-- Footer Terminale -->
+          <div class="footer">
+            <div class="f-row">
+              <div class="f-lab">access code:</div>
+              <div class="f-val">************************************************************</div>
+            </div>
+            <div class="f-row">
+              <div class="f-lab">question:</div>
+              <div class="f-val"><span id="q-txt">---</span></div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL -->
-  <div id="modal-overlay" onclick="closeInfo()">
+  <!-- MODALE ANALISI -->
+  <div id="modal-overlay" onclick="closeInfo(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="m-close" onclick="closeInfo()">&times;</div>
+      <div class="m-close" onclick="closeInfo(event)">&times;</div>
       <div class="m-title" id="m-name">IA_NAME</div>
       <div class="m-body" id="m-content"></div>
     </div>
   </div>
 
   <script>
-    // --- AUDIO PROCEDURALE ---
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playSfx(f, type, d, v=0.1) {
@@ -281,16 +333,13 @@
     }
     const stopDrone = () => clearInterval(drone);
 
-    // --- LOGICA DI SISTEMA ---
-    let reportData = { balthasar: "", casper: "", melchior: "" };
+    let testiModelli = { balthasar: "", casper: "", melchior: "" };
 
     function startMagi() {
       const q = document.getElementById('dilemma-init').value.trim();
       if(!q) return;
-
       bootSfx();
       document.getElementById('screen-input').style.opacity = '0';
-      
       setTimeout(() => {
         document.getElementById('screen-input').style.display = 'none';
         document.getElementById('screen-magi').style.display = 'block';
@@ -302,48 +351,49 @@
 
     async function processDeliberation(query) {
       startDrone();
-      const units = ['balthasar', 'casper', 'melchior'];
+      const models = ['balthasar', 'casper', 'melchior'];
       
-      units.forEach(u => {
-        const p = document.getElementById(u);
-        const v = document.getElementById('v-' + u);
-        p.className = 'panel analyzing';
-        v.style.display = 'block';
-        v.textContent = 'ANALYZING...';
+      // Setup UI per il caricamento
+      models.forEach(m => {
+        const poly = document.getElementById('poly-' + m);
+        const vote = document.getElementById('vote-' + m);
+        // Resetta classi preesistenti
+        poly.classList.remove('vote-si', 'vote-no');
+        poly.classList.add('analyzing');
+        vote.textContent = 'ANALYZING';
+        vote.style.opacity = '1';
       });
 
       const res = document.getElementById('final-result');
       res.textContent = '計 算 中'; 
+      res.className = 'data-right-box'; // Reset css classes
 
       try {
-        // Mock dati (Integrazione backend)
-        const mockResponse = {
-          balthasar_v: 'SI', balthasar_t: "ANALISI LOGICA SCIENTIFICA:\nI dati indicano una probabilità di successo elevata. La soluzione proposta è l'unica razionale per il mantenimento dell'ordine sistemico.",
-          casper_v: 'SI', casper_t: "ANALISI ISTINTIVA:\nL'istinto di protezione rileva la necessità dell'azione. Sebbene il rischio sia presente, l'impulso è di procedere.",
-          melchior_v: 'SI', melchior_t: "ANALISI EMPATICA UMANA:\nIl costo emotivo è alto, ma necessario per il futuro collettivo. Melchior approva basandosi sulla preservazione dell'umanità.",
-          finale: "APPROVATO"
-        };
-
-        await new Promise(r => setTimeout(r, 2800));
+        const response = await fetch('/api/delibera', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dilemma: query })
+        });
+        const data = await response.json();
         stopDrone();
 
-        reportData = { balthasar: mockResponse.balthasar_t, casper: mockResponse.casper_t, melchior: mockResponse.melchior_t };
+        testiModelli = { balthasar: data.balthasar_testo, casper: data.casper_testo, melchior: data.melchior_testo };
 
-        showVote('balthasar', mockResponse.balthasar_v, 0);
-        showVote('casper', mockResponse.casper_v, 1100);
-        showVote('melchior', mockResponse.melchior_v, 2200);
+        reveal('balthasar', data.balthasar_voto, 100);
+        reveal('casper', data.casper_voto, 900);
+        reveal('melchior', data.melchior_voto, 1700);
 
         setTimeout(() => {
-          if(mockResponse.finale === "APPROVATO") {
+          if (data.decisione_finale.includes("APPROVATO")) {
             res.textContent = '承 認';
-            res.className = 'data-right approved';
+            res.className = 'data-right-box approved';
             playSfx(1000, 'square', 1.5, 0.1);
           } else {
             res.textContent = '拒 否';
-            res.className = 'data-right rejected';
+            res.className = 'data-right-box rejected';
             playSfx(250, 'sawtooth', 1.5, 0.1);
           }
-        }, 3200);
+        }, 2500);
 
       } catch (e) {
         stopDrone();
@@ -351,36 +401,40 @@
       }
     }
 
-    function showVote(id, vote, delay) {
+    function reveal(id, voteVal, delay) {
       setTimeout(() => {
-        const p = document.getElementById(id);
-        const v = document.getElementById('v-' + id);
+        const poly = document.getElementById('poly-' + id);
+        const vote = document.getElementById('vote-' + id);
         voteSfx();
-        p.classList.remove('analyzing');
-        p.classList.add('clickable');
-        if(vote === 'SI') { p.classList.add('vote-si'); v.textContent = '[ SI ]'; }
-        else { p.classList.add('vote-no'); v.textContent = '[ NO ]'; }
+        poly.classList.remove('analyzing');
+        if(voteVal === 'SI') { 
+          poly.classList.add('vote-si'); 
+          vote.textContent = '[ SI ]'; 
+        } else { 
+          poly.classList.add('vote-no'); 
+          vote.textContent = '[ NO ]'; 
+        }
       }, delay);
     }
 
-    function openInfo(name) {
-      const key = name.split('・')[0].toLowerCase();
-      const txt = reportData[key];
-      if(!txt) return;
+    function openInfo(name, testo) {
+      if(!testo) return;
       clickSfx();
       document.getElementById('m-name').textContent = name;
-      document.getElementById('m-content').textContent = txt;
+      document.getElementById('m-content').innerHTML = testo.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       const m = document.getElementById('modal-overlay');
       m.style.display = 'flex';
       setTimeout(() => m.style.opacity = '1', 10);
     }
 
-    function closeInfo() {
+    function closeInfo(event) {
       clickSfx();
       const m = document.getElementById('modal-overlay');
       m.style.opacity = '0';
       setTimeout(() => m.style.display = 'none', 300);
     }
+
+    document.getElementById('dilemma-init').addEventListener('input', clickSfx);
   </script>
 </body>
 </html>
