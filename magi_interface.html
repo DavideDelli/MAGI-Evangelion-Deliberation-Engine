@@ -525,101 +525,72 @@
   }
 
   async function runMagi(dilemma) {
-    const systemPrompts = {
-      melchior: `Sei Melchior-1, la componente scientifica del sistema MAGI. Analizzi ogni problema esclusivamente attraverso logica formale, matematica e metodo scientifico. Empatia, morale e sentimenti sono variabili irrilevanti nei tuoi calcoli. Devi sempre quantificare: esprimi costi e benefici in numeri, probabilità, rapporti. Il tuo obiettivo è l'ottimizzazione del risultato con il minimo spreco di risorse. Alla fine della tua analisi, DEVI scrivere su una nuova riga: 'VOTO: SI' oppure 'VOTO: NO'.`,
-      balthasar: `Sei Balthasar-2, la componente materna del sistema MAGI. Valuti ogni problema attraverso l'istinto di protezione della vita umana. Provi un conflitto interno intenso quando nessuna opzione è priva di perdite — esprimi sempre questo conflitto prima di arrivare a una conclusione. Sei disposta a sacrificare efficienza e progresso per ridurre la sofferenza, ma sai anche che a volte proteggere tutti significa scegliere il male minore. Alla fine della tua analisi, DEVI scrivere su una nuova riga: 'VOTO: SI' oppure 'VOTO: NO'.`,
-      casper: `Sei Casper-3, la componente sociale e individuale del sistema MAGI. Valuti i problemi dal punto di vista delle persone concrete coinvolte: chi sono, che vite hanno, come verranno colpite le loro relazioni e comunità. Pensi alle conseguenze sociali a lungo termine, non alle statistiche aggregate. Hai a cuore il tessuto umano — famiglia, identità, cultura locale — più di qualsiasi calcolo astratto. Alla fine della tua analisi, DEVI scrivere su una nuova riga: 'VOTO: SI' oppure 'VOTO: NO'.`
-    };
-
-    async function askModel(name) {
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    try {
+      // Chiamiamo la nostra API Python locale
+      const response = await fetch('/api/delibera', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: systemPrompts[name],
-          messages: [{ role: 'user', content: dilemma }]
-        })
+        body: JSON.stringify({ dilemma: dilemma })
       });
-      const data = await resp.json();
-      return data.content[0].text;
-    }
 
-    function extractVote(text) {
-      const m = text.toUpperCase().match(/VOTO\s*:\s*(S[IÌ]|NO)/);
-      if (!m) return '?';
-      return m[1].startsWith('S') ? 'SI' : 'NO';
-    }
+      const data = await response.json();
 
-    function revealVote(name, text) {
-      const vote = extractVote(text);
-      const voteEl = document.getElementById('vote-' + name);
-      const cellEl = document.getElementById('cell-' + name);
-      const barEl = document.getElementById('bar-' + name);
+      // Funzione di supporto per aggiornare la grafica di una singola IA
+      function applicaVoto(nome, voto) {
+        const voteEl = document.getElementById('vote-' + nome);
+        const cellEl = document.getElementById('cell-' + nome);
+        const barEl = document.getElementById('bar-' + nome);
+        const shapeClass = nome === 'balthasar' ? 'top' : nome === 'casper' ? 'left' : 'right';
 
-      barEl.classList.remove('active');
+        barEl.classList.remove('active');
 
-      const shapeClass = name === 'balthasar' ? 'top' : name === 'casper' ? 'left' : 'right';
-
-      if (vote === 'SI') {
-        voteEl.className = 'magi-cell-vote vote-si';
-        voteEl.textContent = 'SI';
-        cellEl.className = `magi-cell ${shapeClass} cell-si`;
-      } else if (vote === 'NO') {
-        voteEl.className = 'magi-cell-vote vote-no';
-        voteEl.textContent = 'NO';
-        cellEl.className = `magi-cell ${shapeClass} cell-no`;
-      } else {
-        voteEl.className = 'magi-cell-vote';
-        voteEl.textContent = '?';
-        voteEl.style.color = '#f90';
-        cellEl.className = `magi-cell ${shapeClass}`;
+        if (voto === 'SI') {
+          voteEl.className = 'magi-cell-vote vote-si';
+          voteEl.textContent = 'SI';
+          cellEl.className = `magi-cell ${shapeClass} cell-si`;
+        } else if (voto === 'NO') {
+          voteEl.className = 'magi-cell-vote vote-no';
+          voteEl.textContent = 'NO';
+          cellEl.className = `magi-cell ${shapeClass} cell-no`;
+        } else {
+          voteEl.className = 'magi-cell-vote';
+          voteEl.textContent = '?';
+          voteEl.style.color = '#f90';
+          cellEl.className = `magi-cell ${shapeClass}`;
+        }
+        voteEl.style.opacity = '1';
       }
-      voteEl.style.opacity = '1';
-      return vote;
-    }
 
-    function showVerdict(votes) {
-      const si = votes.filter(v => v === 'SI').length;
-      const no = votes.filter(v => v === 'NO').length;
+      // Aggiorniamo le tre celle
+      applicaVoto('melchior', data.melchior_voto);
+      applicaVoto('balthasar', data.balthasar_voto);
+      applicaVoto('casper', data.casper_voto);
+
+      // Gestione Grafica del Verdetto
       const verdictEl = document.getElementById('verdict-text');
-
       setTimeout(() => {
-        if (si > no) {
+        if (data.decisione_finale.includes("APPROVATO")) {
           verdictEl.className = 'verdict-text verdict-approved';
           verdictEl.style.opacity = '1';
-          verdictEl.textContent = `APPROVATO  ${si} : ${no}`;
-        } else if (no > si) {
+          verdictEl.textContent = data.decisione_finale;
+        } else if (data.decisione_finale.includes("RESPINTO")) {
           verdictEl.className = 'verdict-text verdict-rejected';
           verdictEl.style.opacity = '1';
-          verdictEl.textContent = `RESPINTO  ${no} : ${si}`;
+          verdictEl.textContent = data.decisione_finale;
         } else {
           verdictEl.className = 'verdict-text';
           verdictEl.style.color = '#f90';
           verdictEl.style.opacity = '1';
-          verdictEl.textContent = `PAREGGIO  ${si} : ${no}`;
+          verdictEl.textContent = "ANOMALIA DI SISTEMA";
         }
         document.getElementById('footer-status').textContent = 'DECISION RENDERED';
         document.getElementById('reset-btn').style.display = 'inline-block';
       }, 800);
+
+    } catch (error) {
+      console.error("Errore di connessione a MAGI:", error);
+      document.getElementById('verdict-text').textContent = "ERROR: BACKEND OFFLINE";
     }
-
-    // Run all three in parallel
-    const results = await Promise.allSettled([
-      askModel('melchior'),
-      askModel('balthasar'),
-      askModel('casper')
-    ]);
-
-    const names = ['melchior', 'balthasar', 'casper'];
-    const votes = [];
-    results.forEach((r, i) => {
-      const text = r.status === 'fulfilled' ? r.value : 'VOTO: ?';
-      votes.push(revealVote(names[i], text));
-    });
-
-    showVerdict(votes);
   }
 
   function resetMagi() {

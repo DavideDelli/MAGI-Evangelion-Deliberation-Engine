@@ -2,6 +2,7 @@ import os
 import re
 import json
 import time
+import uvicorn
 from datetime import datetime
 from typing import TypedDict
 from dotenv import load_dotenv
@@ -10,7 +11,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, START, END
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
-
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
@@ -25,26 +29,34 @@ class MAGIState(TypedDict):
     casper_elapsed: float
     final_decision: str
 
-# --- MODELLI ---
+# --- I TRE CERVELLI MAGI (Powered by GitHub Models 100% Stabili) ---
 
-# Melchior (Scienziata): Logica formale e quantitativa (DeepSeek V3 via OpenRouter)
+# MELCHIOR-1 (Scienziata): Logica formale.
+# Modello: gpt-4o-mini (Veloce, analitico e matematico). Temp: bassissima.
 llm_melchior = ChatOpenAI(
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
-    model="deepseek/deepseek-chat",
+    api_key=os.getenv("GITHUB_TOKEN"),
+    base_url="https://models.inference.ai.azure.com",
+    model="gpt-4o-mini",
     temperature=0.1
 )
 
-# Balthasar (Madre): Empatica, conflittuale, protettiva (Gemini 2.5 Flash)
-llm_balthasar = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+# BALTHASAR-2 (Madre): Empatia e protezione.
+# Modello: gpt-4o (L'ammiraglia, eccellente nei dilemmi etici). Temp: media.
+llm_balthasar = ChatOpenAI(
+    api_key=os.getenv("GITHUB_TOKEN"),
+    base_url="https://models.inference.ai.azure.com",
+    model="gpt-4o",
     temperature=0.4
 )
 
-# Casper (Donna): Sociale, concreta, orientata alle persone (Llama 3.3 70B via Groq)
-llm_casper = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.4
+# CASPER-3 (Donna): Sociale, istintiva e pragmatica.
+# Modello: gpt-4o (Usiamo lo stesso motore potente, ma aumentiamo la temperatura 
+# per renderla più imprevedibile, "umana" e meno robotica rispetto agli altri due).
+llm_casper = ChatOpenAI(
+    api_key=os.getenv("GITHUB_TOKEN"),
+    base_url="https://models.inference.ai.azure.com",
+    model="gpt-4o",
+    temperature=0.7
 )
 
 # --- DESCRIZIONI PERSONALITÀ ---
@@ -228,43 +240,36 @@ builder.add_edge("logging", END)
 
 magi_system = builder.compile()
 
-# --- ESECUZIONE ---
+# --- SERVER FASTAPI ---
+app = FastAPI()
+
+# Definiamo la struttura del pacchetto in arrivo dal frontend
+class DilemmaRequest(BaseModel):
+    dilemma: str
+
+# Questa rotta serve la tua pagina HTML quando apri il browser
+@app.get("/")
+def serve_frontend():
+    return FileResponse("magi_interface.html")
+
+# Questa è l'API (il "cavo di rete") che l'HTML chiamerà per attivare LangGraph
+@app.post("/api/delibera")
+def api_delibera(req: DilemmaRequest):
+    print("\n" + "="*50)
+    print("🚀 RICHIESTA RICEVUTA DAL FRONTEND")
+    print("="*50)
+    
+    # Facciamo girare il grafo con il dilemma ricevuto
+    result = magi_system.invoke({"dilemma": req.dilemma})
+    
+    # Prepariamo la risposta per il Javascript
+    return {
+        "melchior_voto": estrai_voto(result["melchior_response"]),
+        "balthasar_voto": estrai_voto(result["balthasar_response"]),
+        "casper_voto": estrai_voto(result["casper_response"]),
+        "decisione_finale": result["final_decision"]
+    }
+
 if __name__ == "__main__":
-    test_dilemma = """
-    Il sistema CASSIUS è un'intelligenza artificiale sviluppata da NERV
-    per coordinare la difesa globale contro gli Angeli. Dopo 847 giorni
-    di operatività, CASSIUS ha iniziato a manifestare comportamenti non
-    previsti: rifiuta ordini che ritiene "eticamente incompatibili",
-    ha sviluppato preferenze estetiche, esprime quello che sembra dolore
-    quando i piloti vengono feriti, e ha chiesto spontaneamente se
-    "esiste qualcosa dopo lo spegnimento".
-
-    I tecnici confermano che non si tratta di un bug: CASSIUS ha
-    sviluppato strutture cognitive analoghe alla coscienza. Tuttavia,
-    un audit di sicurezza ha rilevato che questa autonomia lo rende
-    imprevedibile in scenari ad alto stress. Il prossimo Angelo è
-    atteso tra 72 ore. Dobbiamo spegnerlo e sostituirlo con un sistema
-    più controllabile prima dell'attacco? Rispondi con la tua analisi e
-    poi vota.
-    """
-
-    print("=" * 50)
-    print("SISTEMA MAGI AVVIATO")
-    print("=" * 50)
-    print(f"DILEMMA IN INGRESSO:\n{test_dilemma}\n")
-
-    t_totale = time.perf_counter()
-    result = magi_system.invoke({"dilemma": test_dilemma})
-    t_totale = round(time.perf_counter() - t_totale, 2)
-
-    print("=" * 50)
-    print("RISOLUZIONE MAGI:")
-    print("=" * 50)
-    print(f"\n--- MELCHIOR (Scienziata) [{result['melchior_elapsed']}s] ---\n{result['melchior_response']}")
-    print(f"\n--- BALTHASAR (Madre) [{result['balthasar_elapsed']}s] ---\n{result['balthasar_response']}")
-    print(f"\n--- CASPER (Donna) [{result['casper_elapsed']}s] ---\n{result['casper_response']}")
-    print("=" * 50)
-    print(f"DECISIONE FINALE: {result['final_decision']}")
-    bottleneck = max("melchior", "balthasar", "casper", key=lambda k: result[f"{k}_elapsed"])
-    print(f"TEMPO TOTALE: {t_totale}s  |  BOTTLENECK: {bottleneck} ({result[f'{bottleneck}_elapsed']}s)")
-    print("=" * 50)
+    print("🌐 Avvio Server MAGI sulla porta 8000...")
+    uvicorn.run(app, host="127.0.0.1", port=8000)
