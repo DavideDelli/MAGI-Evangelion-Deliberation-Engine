@@ -36,7 +36,8 @@ def arbitration_node(state: MAGIState):
     if missing_votes:
         print(f"  ⚠️  Vote not detected from: {', '.join(missing_votes)}")
 
-    votes_yes = sum(1 for v in votes.values() if v == "SI")
+    # CAMBIA QUESTA RIGA (da "SI" a "YES")
+    votes_yes = sum(1 for v in votes.values() if v == "YES")
     votes_no  = sum(1 for v in votes.values() if v == "NO")
 
     if votes_yes > votes_no:

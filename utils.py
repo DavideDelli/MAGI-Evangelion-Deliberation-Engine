@@ -16,10 +16,10 @@ def is_rate_limit(exc: Exception) -> bool:
     return "rate limit" in msg or "429" in msg or "quota" in msg or "too many requests" in msg
 
 def extract_vote(response: str) -> str:
-    match = re.search(r"VOTO\s*:\s*(S[IÌ]|NO)", response.upper())
+    # Cerca 'VOTE: YES' o 'VOTE: NO'
+    match = re.search(r"VOTE\s*:\s*(YES|NO)", response.upper())
     if match:
-        vote = match.group(1)
-        return "SI" if vote.startswith("S") else "NO"
+        return match.group(1) # Ritorna direttamente "YES" o "NO"
     return "?"
 
 def save_log(state: MAGIState) -> None:

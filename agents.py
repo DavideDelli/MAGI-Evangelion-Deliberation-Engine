@@ -25,7 +25,7 @@ async def ask_agent_with_fallback(
             f"{persona_desc}\n"
             "You must analyze the proposed dilemma.\n"
             "At the end of your analysis, you MUST explicitly write on a new line: "
-            "'VOTO: SI' or 'VOTO: NO'."
+            "'VOTE: YES' or 'VOTE: NO'."
         ),
         ("user", "{dilemma}")
     ])

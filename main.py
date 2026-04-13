@@ -20,16 +20,16 @@ async def api_deliberate(req: DilemmaRequest):
     result = await magi_system.ainvoke({"dilemma": req.dilemma})
 
     return {
-        "melchior_voto":         extract_vote(result["melchior_response"]),
-        "balthasar_voto":        extract_vote(result["balthasar_response"]),
-        "casper_voto":           extract_vote(result["casper_response"]),
-        "melchior_testo":        result["melchior_response"],
-        "balthasar_testo":       result["balthasar_response"],
-        "casper_testo":          result["casper_response"],
+        "melchior_vote":         extract_vote(result["melchior_response"]),
+        "balthasar_vote":        extract_vote(result["balthasar_response"]),
+        "casper_vote":           extract_vote(result["casper_response"]),
+        "melchior_text":         result["melchior_response"],
+        "balthasar_text":        result["balthasar_response"],
+        "casper_text":           result["casper_response"],
         "melchior_model_used":   result.get("melchior_model_used", "?"),
         "balthasar_model_used":  result.get("balthasar_model_used", "?"),
         "casper_model_used":     result.get("casper_model_used", "?"),
-        "decisione_finale":      result["final_decision"],
+        "final_decision":        result["final_decision"],
     }
 
 if __name__ == "__main__":
