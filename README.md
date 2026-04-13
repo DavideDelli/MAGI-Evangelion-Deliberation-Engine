@@ -122,12 +122,12 @@ logs/
 {
   "timestamp": "2026-04-12T02:11:41",
   "dilemma": "Should the operation proceed?",
-  "risposte": {
-    "melchior": { "modello": "Phi-4", "voto": "NO", "elapsed_sec": 12.35 },
-    "balthasar": { "modello": "Llama-4-Maverick-...", "voto": "SI", "elapsed_sec": 3.34 },
-    "casper":   { "modello": "Mistral-Medium-2505", "voto": "SI", "elapsed_sec": 6.25 }
+  "responses": {
+    "melchior": { "model": "Phi-4", "vote": "NO", "elapsed_sec": 12.35 },
+    "balthasar": { "model": "Llama-4-Maverick-...", "vote": "YES", "elapsed_sec": 3.34 },
+    "casper":   { "model": "Mistral-Medium-2505", "vote": "YES", "elapsed_sec": 6.25 }
   },
-  "decisione_finale": "APPROVATO (2 a 1)"
+  "final_decision": "APPROVED (2 to 1)"
 }
 ```
 
@@ -137,12 +137,16 @@ logs/
 
 ```
 magi-system/
-├── magi.py               # Backend: agents, graph, API
+├── config.py             # Global constants and LLM prompts
+├── schemas.py            # Pydantic models and TypedDicts
+├── utils.py              # Helper functions (logging, regex)
+├── agents.py             # OpenAI API connections and failover logic
+├── graph.py              # LangGraph node definitions and edges
+├── main.py               # FastAPI entry point
 ├── magi_interface.html   # Frontend: NERV-style UI
-├── .env                  # GitHub token (not committed)
-├── logs/
-│   ├── json/
-│   └── markdown/
+├── requirements.txt      # Python dependencies
+├── .env.example          # Template for environment variables
+├── logs/                 # Output directory for deliberation logs
 └── README.md
 ```
 
