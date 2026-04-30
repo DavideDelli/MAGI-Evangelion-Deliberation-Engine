@@ -110,7 +110,7 @@ Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
 ### Docker (any OS)
 
-Create a `.env` file as shown above, then run:
+Create a `.env` file as shown above (keep it local and never commit it), then run:
 
 ```bash
 docker compose up --build
