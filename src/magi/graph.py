@@ -1,8 +1,16 @@
-from langgraph.graph import StateGraph, START, END
-from schemas import MAGIState
-from config import MELCHIOR_CONFIGS, BALTHASAR_CONFIGS, CASPER_CONFIGS, DESC_MELCHIOR, DESC_BALTHASAR, DESC_CASPER
-from agents import ask_agent_with_fallback
-from utils import extract_vote, save_log
+from langgraph.graph import END, START, StateGraph
+
+from .agents import ask_agent_with_fallback
+from .config import (
+    BALTHASAR_CONFIGS,
+    CASPER_CONFIGS,
+    DESC_BALTHASAR,
+    DESC_CASPER,
+    DESC_MELCHIOR,
+    MELCHIOR_CONFIGS,
+)
+from .schemas import MAGIState
+from .utils import extract_vote, save_log
 
 async def melchior_node(state: MAGIState):
     print("🧠 Melchior is deliberating...")

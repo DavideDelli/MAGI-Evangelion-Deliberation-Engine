@@ -1,9 +1,9 @@
+import asyncio
 import os
 import time
-import asyncio
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from utils import is_rate_limit
+from .utils import is_rate_limit
 
 def _make_llm(model: str, temperature: float) -> ChatOpenAI:
     return ChatOpenAI(
