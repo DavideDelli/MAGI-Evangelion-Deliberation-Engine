@@ -1,27 +1,41 @@
+<div align="center">
+
 # 🔴 MAGI Supercomputer System
 
-> *"The MAGI are three supercomputers that form the brain of NERV. They were built by Dr. Naoko Akagi and contain her personality engrams — as a scientist, as a mother, as a woman."*
-> — Neon Genesis Evangelion
+**Motore di deliberazione multi‑LLM ispirato ai supercomputer MAGI di *Neon Genesis Evangelion*.**
 
-A multi-LLM deliberation system inspired by the MAGI supercomputers from *Neon Genesis Evangelion*. Three AI models, each embodying one aspect of Dr. Naoko Akagi's personality, independently analyze a dilemma and vote. Majority rules.
+<p>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-Ready-009688?logo=fastapi&logoColor=white">
+  <img alt="LangGraph" src="https://img.shields.io/badge/LangGraph-Orchestrator-8A2BE2">
+</p>
 
----
+> *"The MAGI are three supercomputers that form the brain of NERV. They were built by Dr. Naoko Akagi and contain her personality engrams — as a scientist, as a mother, as a woman."*  
+> — *Neon Genesis Evangelion*
 
-## Interface
-
-### Input Screen
-<img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/13aa3128-78da-4fa8-8ed9-79df2f4d5189" />
-
-
-### Deliberation Result
-<img width="2501" height="1274" alt="image" src="https://github.com/user-attachments/assets/fa98873e-045e-44af-80e9-6ab512056bbb" />
-
+</div>
 
 ---
 
-## How It Works
+## ✨ Panoramica
 
-Each deliberation runs three AI agents in **parallel** via LangGraph. Each agent receives the dilemma with a personality-locked system prompt and must conclude with an explicit `VOTO: SI` or `VOTO: NO`. An arbitration node counts the votes — majority wins. Results are saved as both JSON and Markdown logs.
+Questo progetto riproduce l’architettura MAGI: tre agenti LLM con personalità distinte analizzano un dilemma in parallelo, votano (`VOTE: YES/NO`) e un nodo di arbitraggio decide a maggioranza. I risultati vengono salvati come **JSON** e **Markdown**.
+
+---
+
+## 🖥️ Interfaccia
+
+### Schermata di input
+<img width="1280" height="800" alt="Input" src="https://github.com/user-attachments/assets/13aa3128-78da-4fa8-8ed9-79df2f4d5189" />
+
+### Risultato deliberazione
+<img width="2501" height="1274" alt="Result" src="https://github.com/user-attachments/assets/fa98873e-045e-44af-80e9-6ab512056bbb" />
+
+---
+
+## 🧠 Come funziona
+
+Ogni deliberazione avvia tre agenti in **parallelo** con LangGraph. Ogni agente riceve il dilemma con un prompt di personalità bloccata e termina con un voto esplicito. Un nodo di arbitraggio conta i voti e determina il verdetto finale.
 
 ```
           ┌─────────────┐
@@ -42,17 +56,16 @@ Each deliberation runs three AI agents in **parallel** via LangGraph. Each agent
 
 ---
 
-## The Three Components
+## 🧬 Componenti MAGI
 
-| Component | Personality | Model | Temperature |
-|-----------|-------------|-------|-------------|
-| **MELCHIOR-1** | Dr. Akagi as a **scientist** — cold logic, formal reasoning, quantifies everything | `Phi-4` (Microsoft, 14B) | 0.1 |
-| **BALTHASAR-2** | Dr. Akagi as a **mother** — protective instinct, moral conflict, preservation of life | `Llama-4-Maverick` (Meta, MoE 128E) | 0.4 |
-| **CASPER-3** | Dr. Akagi as a **woman** — social intuition, human relationships, cultural identity | `Mistral-Medium-2505` (Mistral AI) | 0.7 |
+| Componente | Personalità | Modello | Temperature |
+|-----------|-------------|---------|-------------|
+| **MELCHIOR-1** | Dr. Akagi come **scienziata** — logica fredda e formale | `Phi-4` (Microsoft, 14B) | 0.1 |
+| **BALTHASAR-2** | Dr. Akagi come **madre** — empatia e istinto protettivo | `Llama-4-Maverick` (Meta, MoE 128E) | 0.4 |
+| **CASPER-3** | Dr. Akagi come **donna** — intuizione sociale e identità culturale | `Mistral-Medium-2505` (Mistral AI) | 0.7 |
 
-Each model was chosen deliberately: Phi-4's synthetic-data training makes it precise and deterministic (Melchior's cold logic); Llama-4 Maverick's MoE architecture gives it nuanced emotional depth (Balthasar's empathy); Mistral's European cultural sensibility makes it warmer and more narrative (Casper's social instinct).
-
-Each primary model has a **fallback** in case daily rate limits are exhausted:
+### Fallback automatici
+Ogni modello ha un fallback in caso di rate limit:
 
 - Melchior: `Phi-4` → `Phi-4-mini-instruct`
 - Balthasar: `Llama-4-Maverick` → `Llama-4-Scout`
@@ -60,69 +73,87 @@ Each primary model has a **fallback** in case daily rate limits are exhausted:
 
 ---
 
-## Stack
+## 🧩 Stack tecnologico
 
 - **Backend:** Python, FastAPI, LangGraph, LangChain
-- **Models:** GitHub Models (Azure AI inference endpoint)
-- **Frontend:** Vanilla HTML/CSS/JS — CRT aesthetic, scanlines, Share Tech Mono font
-- **Logging:** JSON + Markdown, organized by date under `logs/`
+- **Modelli:** GitHub Models (Azure AI inference endpoint)
+- **Frontend:** HTML/CSS/JS (stile CRT, scanlines, font Share Tech Mono)
+- **Logging:** JSON + Markdown in `logs/`
 
 ---
 
-## Setup
+## ✅ Requisiti
 
-### Prerequisites
+- **Python 3.11+**
+- **GitHub Personal Access Token** con accesso a GitHub Models
 
-- Python 3.11+
-- A [GitHub Personal Access Token](https://github.com/settings/tokens) with access to GitHub Models
+---
 
-### Installation
+## ⚙️ Installazione
 
 ```bash
-git clone https://github.com/your-username/magi-system.git
-cd magi-system
+git clone https://github.com/DavideDelli/MAGI-Evangelion-Deliberation-Engine.git
+cd MAGI-Evangelion-Deliberation-Engine
+
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
 
 pip install -r requirements.txt
 ```
 
-### Configuration
+---
 
-Create a `.env` file in the project root:
+## 🔐 Configurazione
 
-```env
-GITHUB_TOKEN=your_github_pat_here
+Copia il template e compila il token:
+
+```bash
+cp .env.example .env
 ```
 
-### Run
+```env
+GITHUB_TOKEN=il_tuo_github_pat
+```
+
+---
+
+## ▶️ Avvio in locale
 
 ```bash
 PYTHONPATH=src uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
 ```
 
-> `PYTHONPATH=src` ensures Python can resolve the `magi` package from the `src/` layout.
->
-> **Windows (PowerShell):**
-> ```powershell
-> $env:PYTHONPATH="src"; uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
-> ```
+**Windows (PowerShell):**
+```powershell
+$env:PYTHONPATH="src"; uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
+```
 
-Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+Apri: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-### Docker (any OS)
+---
 
-Create a `.env` file as shown above (keep it local and never commit it), then run:
+## 🐳 Docker
 
 ```bash
 docker compose up --build
 ```
 
-Open [http://localhost:8000](http://localhost:8000) in your browser. Logs are persisted on the host in `./logs`.
+Apri: [http://localhost:8000](http://localhost:8000)  
+I log sono persistiti in `./logs`.
 
 ---
 
-## Log Format
+## 🧪 Test
 
-Every deliberation is saved in two formats under `logs/`:
+```bash
+PYTHONPATH=src python -m unittest discover -s tests
+```
+
+---
+
+## 🗂️ Log e output
+
+Ogni deliberazione genera due file:
 
 ```
 logs/
@@ -134,53 +165,37 @@ logs/
         └── magi_run_YYYYMMDD_HHMMSS.md
 ```
 
-**JSON example:**
-```json
-{
-  "timestamp": "2026-04-12T02:11:41",
-  "dilemma": "Should the operation proceed?",
-  "responses": {
-    "melchior": { "model": "Phi-4", "vote": "NO", "elapsed_sec": 12.35 },
-    "balthasar": { "model": "Llama-4-Maverick-...", "vote": "YES", "elapsed_sec": 3.34 },
-    "casper":   { "model": "Mistral-Medium-2505", "vote": "YES", "elapsed_sec": 6.25 }
-  },
-  "final_decision": "APPROVED (2 to 1)"
-}
-```
-
 ---
 
-## Project Structure
+## 🧭 Struttura del progetto
 
 ```
-magi-system/
+MAGI-Evangelion-Deliberation-Engine/
 ├── src/
 │   └── magi/
 │       ├── __init__.py        # Package marker
 │       ├── api.py             # FastAPI entry point
-│       ├── agents.py          # OpenAI API connections and failover logic
-│       ├── config.py          # Global constants and LLM prompts
-│       ├── graph.py           # LangGraph node definitions and edges
-│       ├── schemas.py         # Pydantic models and TypedDicts
-│       └── utils.py           # Helper functions (logging, regex)
+│       ├── agents.py          # LLM connections e fallback
+│       ├── config.py          # Costanti e prompt
+│       ├── graph.py           # Nodi LangGraph
+│       ├── schemas.py         # Modelli Pydantic
+│       └── utils.py           # Logging e utilities
 ├── frontend/
 │   ├── templates/
-│   │   └── magi_interface.html  # Frontend: NERV-style UI
-│   └── static/                  # Static assets (if needed)
-├── tests/                        # Test suite placeholder
-├── requirements.txt              # Python dependencies
-├── .env.example                  # Template for environment variables
-├── logs/                         # Output directory for deliberation logs
+│   │   └── magi_interface.html
+│   └── static/
+├── tests/
+├── requirements.txt
+├── .env.example
+├── logs/
 └── README.md
 ```
 
 ---
 
-## Inspiration
+## 📚 Ispirazione
 
-The MAGI system in *Neon Genesis Evangelion* (1995) was a trio of supercomputers created by Dr. Naoko Akagi, each containing one aspect of her personality engram. In the show, they were used to make critical strategic and ethical decisions for NERV — often deadlocking 2-to-1 at the worst possible moments.
-
-This project recreates that architecture using modern language models, with each model selected to match the cognitive and emotional profile of its corresponding component.
+Nel 1995 i MAGI di *Neon Genesis Evangelion* erano tre supercomputer creati da Dr. Naoko Akagi, ognuno con una parte della sua personalità. Questo progetto ricrea quella struttura con LLM moderni, selezionati per riflettere la componente cognitiva ed emotiva di ogni nodo.
 
 ---
 
