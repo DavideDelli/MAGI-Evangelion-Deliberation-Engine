@@ -35,7 +35,7 @@ Questo progetto riproduce l’architettura MAGI: tre agenti LLM con personalità
 
 ## 🧠 Come funziona
 
-Ogni deliberazione avvia tre agenti in **parallelo** con LangGraph. Ogni agente riceve il dilemma con un prompt di personalità bloccata e termina con un voto esplicito. Un nodo di arbitraggio conta i voti e determina il verdetto finale.
+Ogni deliberazione avvia tre agenti in **parallelo** con LangGraph. Ogni agente riceve il dilemma con un prompt di personalità bloccata e termina con un voto esplicito (`VOTE: YES` o `VOTE: NO`). Un nodo di arbitraggio conta i voti e determina il verdetto finale.
 
 ```
           ┌─────────────┐
