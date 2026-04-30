@@ -33,7 +33,7 @@ This project recreates the MAGI architecture: three LLM agents with distinct per
 
 ---
 
-## 🧠 How it works
+## 🧠 How It Works
 
 Each deliberation runs three agents in **parallel** with LangGraph. Each agent receives the dilemma with a personality‑locked system prompt and ends with an explicit vote (`VOTE: YES` or `VOTE: NO`). An arbitration node counts votes and determines the final verdict.
 
