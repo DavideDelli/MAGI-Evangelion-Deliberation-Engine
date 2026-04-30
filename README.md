@@ -99,6 +99,8 @@ GITHUB_TOKEN=your_github_pat_here
 PYTHONPATH=src uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
 ```
 
+> `PYTHONPATH=src` ensures Python can resolve the `magi` package from the `src/` layout.
+
 Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
 ---
