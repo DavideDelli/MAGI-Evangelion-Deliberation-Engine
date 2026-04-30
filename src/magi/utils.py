@@ -1,10 +1,13 @@
+import json
 import os
 import re
-import json
 from datetime import datetime
+from pathlib import Path
+
 from openai import RateLimitError
-from schemas import MAGIState
-from config import MELCHIOR_CONFIGS, BALTHASAR_CONFIGS, CASPER_CONFIGS
+
+from .config import BALTHASAR_CONFIGS, CASPER_CONFIGS, MELCHIOR_CONFIGS
+from .schemas import MAGIState
 
 def is_rate_limit(exc: Exception) -> bool:
     if isinstance(exc, RateLimitError):
@@ -23,17 +26,18 @@ def extract_vote(response: str) -> str:
     return "?"
 
 def save_log(state: MAGIState) -> None:
+    base_dir = Path(__file__).resolve().parents[2]
     now = datetime.now()
     timestamp = now.strftime("%Y%m%d_%H%M%S")
     date_dir  = now.strftime("%Y%m%d")
 
-    json_dir = os.path.join("logs", "json", date_dir)
-    md_dir   = os.path.join("logs", "markdown", date_dir)
+    json_dir = base_dir / "logs" / "json" / date_dir
+    md_dir   = base_dir / "logs" / "markdown" / date_dir
     os.makedirs(json_dir, exist_ok=True)
     os.makedirs(md_dir,   exist_ok=True)
 
-    json_filename = os.path.join(json_dir, f"magi_run_{timestamp}.json")
-    md_filename   = os.path.join(md_dir,   f"magi_run_{timestamp}.md")
+    json_filename = json_dir / f"magi_run_{timestamp}.json"
+    md_filename   = md_dir / f"magi_run_{timestamp}.md"
 
     vote_melchior  = extract_vote(state["melchior_response"])
     vote_balthasar = extract_vote(state["balthasar_response"])

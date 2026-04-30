@@ -82,7 +82,7 @@ Each primary model has a **fallback** in case daily rate limits are exhausted:
 git clone https://github.com/your-username/magi-system.git
 cd magi-system
 
-pip install fastapi uvicorn python-dotenv langchain-core langchain-openai langgraph openai pydantic
+pip install -r requirements.txt
 ```
 
 ### Configuration
@@ -96,8 +96,15 @@ GITHUB_TOKEN=your_github_pat_here
 ### Run
 
 ```bash
-python magi.py
+PYTHONPATH=src uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
 ```
+
+> `PYTHONPATH=src` ensures Python can resolve the `magi` package from the `src/` layout.
+>
+> **Windows (PowerShell):**
+> ```powershell
+> $env:PYTHONPATH="src"; uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
+> ```
 
 Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
@@ -137,16 +144,23 @@ logs/
 
 ```
 magi-system/
-├── config.py             # Global constants and LLM prompts
-├── schemas.py            # Pydantic models and TypedDicts
-├── utils.py              # Helper functions (logging, regex)
-├── agents.py             # OpenAI API connections and failover logic
-├── graph.py              # LangGraph node definitions and edges
-├── main.py               # FastAPI entry point
-├── magi_interface.html   # Frontend: NERV-style UI
-├── requirements.txt      # Python dependencies
-├── .env.example          # Template for environment variables
-├── logs/                 # Output directory for deliberation logs
+├── src/
+│   └── magi/
+│       ├── __init__.py        # Package marker
+│       ├── api.py             # FastAPI entry point
+│       ├── agents.py          # OpenAI API connections and failover logic
+│       ├── config.py          # Global constants and LLM prompts
+│       ├── graph.py           # LangGraph node definitions and edges
+│       ├── schemas.py         # Pydantic models and TypedDicts
+│       └── utils.py           # Helper functions (logging, regex)
+├── frontend/
+│   ├── templates/
+│   │   └── magi_interface.html  # Frontend: NERV-style UI
+│   └── static/                  # Static assets (if needed)
+├── tests/                        # Test suite placeholder
+├── requirements.txt              # Python dependencies
+├── .env.example                  # Template for environment variables
+├── logs/                         # Output directory for deliberation logs
 └── README.md
 ```
 

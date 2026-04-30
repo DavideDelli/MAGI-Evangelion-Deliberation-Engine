@@ -1,15 +1,24 @@
+from pathlib import Path
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
-from schemas import DilemmaRequest
-from graph import magi_system
-from utils import extract_vote
+from fastapi.staticfiles import StaticFiles
+
+from .graph import magi_system
+from .schemas import DilemmaRequest
+from .utils import extract_vote
 
 app = FastAPI(title="MAGI Deliberation API")
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR / "static")), name="static")
+
 @app.get("/")
 def serve_frontend():
-    return FileResponse("magi_interface.html")
+    return FileResponse(FRONTEND_DIR / "templates" / "magi_interface.html")
 
 @app.post("/api/delibera")
 async def api_deliberate(req: DilemmaRequest):
@@ -34,5 +43,10 @@ async def api_deliberate(req: DilemmaRequest):
 
 if __name__ == "__main__":
     print("🌐 Starting MAGI server on port 8000...")
-    # Ora avvii 'main:app' invece che il vecchio file
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(
+        "magi.api:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+        app_dir=str(BASE_DIR / "src"),
+    )
