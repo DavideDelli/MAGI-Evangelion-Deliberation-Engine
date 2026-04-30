@@ -19,7 +19,7 @@
 
 ## ✨ Panoramica
 
-Questo progetto riproduce l’architettura MAGI: tre agenti LLM con personalità distinte analizzano un dilemma in parallelo, votano (`VOTE: YES/NO`) e un nodo di arbitraggio decide a maggioranza. I risultati vengono salvati come **JSON** e **Markdown**.
+Questo progetto riproduce l’architettura MAGI: tre agenti LLM con personalità distinte analizzano un dilemma in parallelo, votano (`VOTE: YES` o `VOTE: NO`) e un nodo di arbitraggio decide a maggioranza. I risultati vengono salvati come **JSON** e **Markdown**.
 
 ---
 
