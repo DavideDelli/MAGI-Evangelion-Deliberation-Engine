@@ -25,10 +25,10 @@ This project recreates the MAGI architecture: three LLM agents with distinct per
 
 ## 🖥️ Interface
 
-### Input screen
+### Input Screen
 <img width="1280" height="800" alt="Input" src="https://github.com/user-attachments/assets/13aa3128-78da-4fa8-8ed9-79df2f4d5189" />
 
-### Deliberation result
+### Deliberation Result
 <img width="2501" height="1274" alt="Result" src="https://github.com/user-attachments/assets/fa98873e-045e-44af-80e9-6ab512056bbb" />
 
 ---
