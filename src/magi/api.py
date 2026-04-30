@@ -43,4 +43,10 @@ async def api_deliberate(req: DilemmaRequest):
 
 if __name__ == "__main__":
     print("🌐 Starting MAGI server on port 8000...")
-    uvicorn.run("magi.api:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(
+        "magi.api:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+        app_dir=str(BASE_DIR / "src"),
+    )
