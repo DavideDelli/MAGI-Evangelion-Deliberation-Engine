@@ -108,6 +108,16 @@ PYTHONPATH=src uvicorn magi.api:app --reload --host 127.0.0.1 --port 8000
 
 Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
+### Docker (any OS)
+
+Create a `.env` file as shown above (keep it local and never commit it), then run:
+
+```bash
+docker compose up --build
+```
+
+Open [http://localhost:8000](http://localhost:8000) in your browser. Logs are persisted on the host in `./logs`.
+
 ---
 
 ## Log Format
